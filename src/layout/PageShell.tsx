@@ -26,8 +26,6 @@ export default function PageShell({
   try {
     const wallet = await connectWallet();
 
-    console.log("SUCCESS: wallet returned", wallet);
-
     setWalletAddress(wallet.address);
   } catch (err: any) {
     console.error("ERROR CONNECTING WALLET:", err);

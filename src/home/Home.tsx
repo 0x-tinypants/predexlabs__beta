@@ -100,14 +100,15 @@ export default function Home({
     try {
 
       // 🔒 Skip if wallet not connected yet
-      if (!walletAddress || !window.ethereum?.selectedAddress) {
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+
+      if (chainId !== "0xaa36a7") {
         return;
       }
 
       const factory = await getFactory();
 
       const windowSeconds = await factory.disputeWindowSeconds();
-      console.log("DISPUTE WINDOW (seconds):", windowSeconds.toString());
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       // 🔥 Pull all EscrowCreated events from factory
