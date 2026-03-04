@@ -44,8 +44,6 @@ export default function Home({
 }) {
   const viewerUserId = currentUser ?? null;
 
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-
   const navigate = useNavigate();
 
   /* -----------------------------
