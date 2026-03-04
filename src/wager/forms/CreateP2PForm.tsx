@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./CreateP2PForm.css";
+import "./CreateP2pForm.css";
 
 export default function CreateP2PForm({
   onSubmit,
