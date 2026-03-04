@@ -43,20 +43,8 @@ export default function Home({
   currentUser: string | null;
 }) {
   const viewerUserId = currentUser ?? null;
+
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  useEffect(() => {
-    async function loadWallet() {
-      if (!window.ethereum) return;
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const address = await signer.getAddress();
-
-      setWalletAddress(address);
-    }
-
-    loadWallet();
-  }, []);
 
   const navigate = useNavigate();
 
@@ -109,6 +97,12 @@ export default function Home({
   // 🔥 OUTSIDE useEffect
   async function syncFromChain() {
     try {
+
+      // 🔒 Skip if wallet not connected yet
+      if (!walletAddress || !window.ethereum?.selectedAddress) {
+        return;
+      }
+
       const factory = await getFactory();
 
       const windowSeconds = await factory.disputeWindowSeconds();
