@@ -21,13 +21,19 @@ export default function PageShell({
     useState<string | null>(null);
 
   const handleConnect = async () => {
-    try {
-      const wallet = await connectWallet();
-      setWalletAddress(wallet.address);
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
+  console.log("CLICK: Connect Wallet button");
+
+  try {
+    const wallet = await connectWallet();
+
+    console.log("SUCCESS: wallet returned", wallet);
+
+    setWalletAddress(wallet.address);
+  } catch (err: any) {
+    console.error("ERROR CONNECTING WALLET:", err);
+    alert(err.message);
+  }
+};
 
   return (
     <div className="app-shell">
