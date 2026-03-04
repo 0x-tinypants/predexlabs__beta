@@ -111,16 +111,24 @@ export default function Home({
       const windowSeconds = await factory.disputeWindowSeconds();
 
       const provider = new ethers.BrowserProvider(window.ethereum);
+
       // 🔥 Pull all EscrowCreated events from factory
       const events = await factory.queryFilter(
-        factory.filters.EscrowCreated()
+        factory.filters.EscrowCreated(),
+        0,
+        "latest"
       );
+
+      console.log("ESCROW EVENTS FOUND:", events.length);
 
       if (!events.length) return;
 
       const rebuilt: PreDEXWager[] = [];
 
       for (const event of events) {
+
+        console.log("ESCROW EVENT RAW:", event);
+
         if (!("args" in event)) continue;
 
         const escrowAddress = event.args.escrow as string; if (!escrowAddress) continue;
@@ -130,14 +138,13 @@ export default function Home({
         const partyA = await escrow.partyA();
         const partyB = await escrow.partyB();
 
-        // Only show escrows relevant to connected wallet
-        if (
-          walletAddress &&
-          walletAddress !== partyA &&
-          walletAddress !== partyB
-        ) {
-          continue;
-        }
+        // if (
+        //   walletAddress &&
+        //   walletAddress !== partyA &&
+        //   walletAddress !== partyB
+        // ) {
+        //   continue;
+        // }
 
         const stake = await escrow.stakeAmount();
         const chainState = Number(await escrow.state());
