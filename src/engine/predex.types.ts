@@ -65,11 +65,11 @@ export interface Claim {
 
 export type Resolution = {
   state:
-  | "PENDING"
-  | "CLAIMABLE"
-  | "PROPOSED"
-  | "RESOLVED"
-  | "DISPUTED";
+    | "PENDING"
+    | "CLAIMABLE"
+    | "PROPOSED"
+    | "RESOLVED"
+    | "DISPUTED";
 
   claims: Claim[];
 
@@ -82,7 +82,7 @@ export type Resolution = {
 };
 
 /* =========================
-   EXPOSURE BUCKET
+   EXPOSURE BUCKET (OPEN_BET + INVITE)
 ========================= */
 
 export interface ExposureBucket {
@@ -98,9 +98,7 @@ export interface ExposureBucket {
 
 export interface OpenEngineWager {
   id: string;
-
-  style: "OPEN_BET"; // 🔥 strict literal
-
+  style: "OPEN_BET";
   creatorId: string;
 
   assertionType: AssertionType;
@@ -110,13 +108,11 @@ export interface OpenEngineWager {
   line?: string;
 
   deadline: ISODateString;
-
   state: WagerState;
 
   exposure: ExposureBucket;
 
   resolution: Resolution;
-
   createdAt: ISODateString;
 
   p2p?: {
@@ -133,9 +129,7 @@ export interface OpenEngineWager {
 
 export interface EngineP2PInviteWager {
   id: string;
-
   style: "P2P_INVITE";
-
   creatorId: string;
 
   assertionType: AssertionType;
@@ -145,13 +139,11 @@ export interface EngineP2PInviteWager {
   line?: string;
 
   deadline: ISODateString;
-
   state: WagerState;
 
   exposure: ExposureBucket;
 
   resolution: Resolution;
-
   createdAt: ISODateString;
 
   p2p: {
@@ -171,7 +163,6 @@ export interface ChainP2PWager {
   escrowAddress: string;
 
   style: "P2P";
-
   creatorId: string;
 
   partyA: string;
@@ -182,7 +173,7 @@ export interface ChainP2PWager {
   deadline: ISODateString;
   createdAt: ISODateString;
 
-  // 🔥 NEW — Raw chain truth
+  // Raw chain truth
   chainState: number;
   disputeDeadline: number;
   proposedWinner: string;
@@ -194,6 +185,7 @@ export interface ChainP2PWager {
 
 /* =========================================================
    UNION — MASTER WAGER TYPE
+   (Keep union intact so legacy files compile.)
 ========================================================= */
 
 export type PreDEXWager =
@@ -205,26 +197,20 @@ export type PreDEXWager =
    COUNTER WAGER (OPEN ONLY)
 ========================= */
 
-export interface CounterWager {
-  id: string;
-
-  parentWagerId: string;
-
-  takerId: string;
-
-  amount: number;
-
-  lockedAt: ISODateString;
-
-  resolved: boolean;
-
-  outcome?: CounterWagerOutcome;
-}
-
 export type CounterWagerOutcome =
   | "CREATOR_WIN"
   | "TAKER_WIN"
   | "PUSH";
+
+export interface CounterWager {
+  id: string;
+  parentWagerId: string;
+  takerId: string;
+  amount: number;
+  lockedAt: ISODateString;
+  resolved: boolean;
+  outcome?: CounterWagerOutcome;
+}
 
 /* =========================
    ENGINE EVENTS (AUDIT LOG)
@@ -232,24 +218,40 @@ export type CounterWagerOutcome =
 
 export type PreDEXEvent =
   | {
-    type: "WAGER_CREATED";
-    wagerId: string;
-    timestamp: ISODateString;
-  }
+      type: "WAGER_CREATED";
+      wagerId: string;
+      timestamp: ISODateString;
+    }
   | {
-    type: "COUNTER_WAGER_ACCEPTED";
-    wagerId: string;
-    counterWagerId: string;
-    amount: number;
-    timestamp: ISODateString;
-  }
+      type: "COUNTER_WAGER_ACCEPTED";
+      wagerId: string;
+      counterWagerId: string;
+      amount: number;
+      timestamp: ISODateString;
+    }
   | {
-    type: "WAGER_LOCKED";
-    wagerId: string;
-    timestamp: ISODateString;
-  }
+      type: "WAGER_LOCKED";
+      wagerId: string;
+      timestamp: ISODateString;
+    }
   | {
-    type: "WAGER_RESOLVED";
-    wagerId: string;
-    timestamp: ISODateString;
-  };
+      type: "WAGER_RESOLVED";
+      wagerId: string;
+      timestamp: ISODateString;
+    };
+
+/* =========================================================
+   TYPE GUARDS (use these everywhere you were getting errors)
+========================================================= */
+
+export function isChainP2P(w: PreDEXWager): w is ChainP2PWager {
+  return w.style === "P2P";
+}
+
+export function isOpenBet(w: PreDEXWager): w is OpenEngineWager {
+  return w.style === "OPEN_BET";
+}
+
+export function isP2PInvite(w: PreDEXWager): w is EngineP2PInviteWager {
+  return w.style === "P2P_INVITE";
+}

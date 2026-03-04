@@ -2,13 +2,23 @@ import type {
   PreDEXWager,
   CounterWager,
   ISODateString,
+  OpenEngineWager,
 } from "./predex.types";
-import { WAGER_STATES } from "./predex.types";
+
+import {
+  WAGER_STATES,
+  isOpenBet,
+} from "./predex.types";
+
 import {
   canReserveExposure,
   reserveExposure,
 } from "./exposure.logic";
-import { canTransitionTo, transitionWagerState } from "./wager.state";
+
+import {
+  canTransitionTo,
+  transitionWagerState,
+} from "./wager.state";
 
 /* =========================================================
    Helpers
@@ -24,12 +34,9 @@ function generateId(prefix: string): string {
 
 /* =========================================================
    Create Counter-Wager (PURE)
+   Only valid for OPEN_BET style
 ========================================================= */
 
-/**
- * Attempts to attach a counter-wager to a parent PreDEX wager.
- * Returns updated wager + new counter-wager.
- */
 export function createCounterWager(params: {
   wager: PreDEXWager;
   takerId: string;
@@ -40,40 +47,79 @@ export function createCounterWager(params: {
 } {
   const { wager, takerId, amount } = params;
 
-  // 1) Must be OPEN
-  if (wager.state !== WAGER_STATES.OPEN) {
+  /* -------------------------------------------------------
+     0) Must be OPEN_BET (exposure-based wagers only)
+  ------------------------------------------------------- */
+
+  if (!isOpenBet(wager)) {
+    throw new Error(
+      "Counter wagers only allowed on OPEN_BET wagers"
+    );
+  }
+
+  const openWager: OpenEngineWager = wager;
+
+  /* -------------------------------------------------------
+     1) Must be OPEN
+  ------------------------------------------------------- */
+
+  if (openWager.state !== WAGER_STATES.OPEN) {
     throw new Error("Wager is not open for counter-wagers");
   }
 
-  // 2) Deadline must not be passed
-  if (wager.deadline <= nowISO()) {
+  /* -------------------------------------------------------
+     2) Deadline must not be passed
+  ------------------------------------------------------- */
+
+  if (openWager.deadline <= nowISO()) {
     throw new Error("Wager deadline has passed");
   }
 
-  // 3) Exposure must be reservable
-  if (!canReserveExposure(wager.exposure, amount)) {
-    throw new Error("Exposure cannot be reserved for this amount");
+  /* -------------------------------------------------------
+     3) Exposure must be reservable
+  ------------------------------------------------------- */
+
+  if (!canReserveExposure(openWager.exposure, amount)) {
+    throw new Error(
+      "Exposure cannot be reserved for this amount"
+    );
   }
 
-  // 4) Reserve exposure (pure)
-  const updatedExposure = reserveExposure(wager.exposure, amount);
+  /* -------------------------------------------------------
+     4) Reserve exposure (pure)
+  ------------------------------------------------------- */
 
-  // 5) Create bilateral counter-wager slice
+  const updatedExposure = reserveExposure(
+    openWager.exposure,
+    amount
+  );
+
+  /* -------------------------------------------------------
+     5) Create counter-wager slice
+  ------------------------------------------------------- */
+
   const counterWager: CounterWager = {
     id: generateId("cw"),
-    parentWagerId: wager.id,
+    parentWagerId: openWager.id,
     takerId,
     amount,
     lockedAt: nowISO(),
     resolved: false,
   };
 
-  let updatedWager: PreDEXWager = {
-    ...wager,
+  /* -------------------------------------------------------
+     6) Update wager
+  ------------------------------------------------------- */
+
+  let updatedWager: OpenEngineWager = {
+    ...openWager,
     exposure: updatedExposure,
   };
 
-  // 6) Auto-lock if exposure filled
+  /* -------------------------------------------------------
+     7) Auto-lock if exposure filled
+  ------------------------------------------------------- */
+
   if (
     updatedExposure.reservedExposure >=
       updatedExposure.maxExposure &&
@@ -82,8 +128,11 @@ export function createCounterWager(params: {
     updatedWager = transitionWagerState(
       updatedWager,
       WAGER_STATES.LOCKED
-    );
+    ) as OpenEngineWager;
   }
 
-  return { updatedWager, counterWager };
+  return {
+    updatedWager,
+    counterWager,
+  };
 }

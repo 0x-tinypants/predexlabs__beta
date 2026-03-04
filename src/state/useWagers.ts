@@ -13,6 +13,8 @@ import {
 import type {
   ResolutionOutcome,
   PreDEXWager,
+  OpenEngineWager,
+  ChainP2PWager,
 } from "../engine/predex.types";
 
 import type { Market } from "../engine/market.types";
@@ -99,8 +101,7 @@ type ChainP2PFields = {
 };
 
 // We keep PreDEXWager as the base type and add optional chain fields only for style==="P2P".
-type AppWager = PreDEXWager & Partial<ChainP2PFields> & { style: PreDEXWager["style"] };
-
+type AppWager = PreDEXWager & Partial<ChainP2PFields>;
 /* =========================================================
    LOCAL STORAGE KEYS
 ========================================================= */
@@ -208,37 +209,37 @@ export function useWagers() {
       const additions: AppWager[] = stored
         .filter((row) => !existing.has(row.escrowAddress.toLowerCase()))
         .map((row) => {
-          // Minimal placeholder (UI should rely on chainState after sync)
-          const id = crypto.randomUUID();
-          return {
-            id,
-            creatorId: row.partyA || "unknown",
-            style: "P2P" as any,
+          const id = row.escrowAddress; // for chain wagers, id = escrowAddress
 
-            // keep these fields to satisfy existing UI usages elsewhere
-            assertionType: "head_to_head" as any,
-            declaredDirection: "sideA" as any,
-            description: "P2P Wager",
-            line: "",
+          const placeholder: ChainP2PWager & Partial<ChainP2PFields> = {
+            // Required ChainP2PWager fields
+            id,
+            escrowAddress: row.escrowAddress,
+            style: "P2P",
+            creatorId: row.partyA || "unknown",
+
+            partyA: row.partyA || "",
+            partyB: row.partyB || "",
+
+            stakePerParticipant: 0, // UI can derive from Wei field later
             deadline: new Date((row.deadlineTs || 0) * 1000).toISOString(),
-            state: "OPEN" as any,
-            exposure: {
-              maxExposure: 0,
-              reservedExposure: 0,
-              minPerCounterparty: 0,
-              maxPerCounterparty: 0,
-            },
             createdAt: new Date().toISOString(),
 
-            // chain fields
-            escrowAddress: row.escrowAddress,
-            partyA: row.partyA,
-            partyB: row.partyB,
+            chainState: 0,
+            disputeDeadline: 0,
+            proposedWinner: "",
+            disputed: false,
+
+            state: "OPEN" as any,
+            resolution: { state: "PENDING", claims: [] },
+
+            // Extra UI / chain helper fields
             stakePerParticipantWei: row.stakePerParticipantWei,
             deadlineTs: row.deadlineTs,
             createdAtBlockTs: row.createdAtBlockTs,
-            chainState: 0,
-          } as AppWager;
+          };
+
+          return placeholder as AppWager;
         });
 
       return [...additions, ...prev];
@@ -370,7 +371,7 @@ export function useWagers() {
       );
     }
 
-    const engineWager: Omit<PreDEXWager, "resolution"> = {
+    const engineWager: Omit<OpenEngineWager, "resolution"> = {
       id: uiWager.id,
       creatorId: uiWager.creatorId,
 
@@ -416,50 +417,54 @@ export function useWagers() {
     createdAtBlockTs?: number;
     description?: string;
   }) {
-    const id = crypto.randomUUID();
+    // For chain wagers, id = escrowAddress (clean + deterministic)
+    const id = params.escrowAddress;
 
-    const placeholder: AppWager = {
+    const placeholder: ChainP2PWager & Partial<ChainP2PFields> = {
+      /* =========================
+         Required ChainP2PWager Fields
+      ========================== */
+
       id,
-      creatorId: params.partyA || "unknown",
-      style: "P2P" as any,
-
-      assertionType: "head_to_head" as any,
-      declaredDirection: "sideA" as any,
-
-      description: params.description || "P2P Wager",
-      line: "",
-      deadline: new Date(params.deadlineTs * 1000).toISOString(),
-
-      state: "OPEN" as any,
-
-      exposure: {
-        maxExposure: 0,
-        reservedExposure: 0,
-        minPerCounterparty: 0,
-        maxPerCounterparty: 0,
-      },
-
-      createdAt: new Date().toISOString(),
-
       escrowAddress: params.escrowAddress,
+      style: "P2P",
+
+      creatorId: params.partyA || "unknown",
+
       partyA: params.partyA,
       partyB: params.partyB,
+
+      stakePerParticipant: 0, // you can later convert from Wei if needed
+
+      deadline: new Date(params.deadlineTs * 1000).toISOString(),
+      createdAt: new Date().toISOString(),
+
+      chainState: 0,
+      disputeDeadline: 0,
+      proposedWinner: "",
+      disputed: false,
+
+      state: "OPEN" as any,
+      resolution: { state: "PENDING", claims: [] },
+
+      /* =========================
+         Optional UI / Helper Fields
+      ========================== */
+
       stakePerParticipantWei: params.stakePerParticipantWei,
       deadlineTs: params.deadlineTs,
       createdAtBlockTs: params.createdAtBlockTs,
-      chainState: 0,
     };
 
-    setWagers((prev) => [placeholder, ...prev]);
+    setWagers((prev) => [placeholder as AppWager, ...prev]);
 
-    // Immediately sync chain
+    // Immediately sync from chain so placeholder gets real state
     queueMicrotask(() => {
       void syncFromChain();
     });
 
     return id;
   }
-
   /* =========================================================
      P2P — ACCEPT (ON-CHAIN)
      This is the ONLY acceptance path.
@@ -506,13 +511,34 @@ export function useWagers() {
       creatorId: params.creatorId,
       creatorUsername: params.creatorUsername,
       format: params.format,
-      courseContext: params.courseContext,
+
+      courseContext: {
+        courseName: params.courseContext.courseName,
+        courseLocation: params.courseContext.courseLocation ?? "",
+        teeName: params.courseContext.teeName,
+        par: params.courseContext.par,
+        yardage: params.courseContext.yardage,
+
+        courseId: crypto.randomUUID(),
+        courseRating: 72,
+        slopeRating: 120,
+        declaredBy: "creator",
+      },
+
       startTime: params.startTime,
+
       tileWagerIds: [],
+
+      // ✅ THIS WAS MISSING
+      exposure: {
+        maxPerContract: 1000,
+        maxTotalLiquidity: undefined,
+        creatorMaxExposure: undefined,
+      },
+
       status: "draft",
       createdAt: new Date().toISOString(),
     };
-
     setMarkets((prev) => [newMarket, ...prev]);
     return newMarket;
   }

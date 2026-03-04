@@ -1,5 +1,9 @@
 import type { PreDEXWager, WagerState } from "./predex.types";
-import { WAGER_STATES } from "./predex.types";
+import {
+  WAGER_STATES,
+  isOpenBet,
+  isP2PInvite,
+} from "./predex.types";
 import { isExposureFilled } from "./exposure.logic";
 
 /* =========================================================
@@ -25,15 +29,25 @@ const ALLOWED_TRANSITIONS: Record<WagerState, readonly WagerState[]> = {
 ========================================================= */
 
 function canLock(wager: PreDEXWager): boolean {
-  // Can lock if:
-  // - deadline passed OR
-  // - exposure fully filled
   const now = new Date().toISOString();
-  return wager.deadline <= now || isExposureFilled(wager.exposure);
+
+  // 🔥 Chain P2P → only deadline matters
+  if (wager.style === "P2P") {
+    return wager.deadline <= now;
+  }
+
+  // 🔥 OPEN_BET & P2P_INVITE → deadline OR exposure filled
+  if (isOpenBet(wager) || isP2PInvite(wager)) {
+    return (
+      wager.deadline <= now ||
+      isExposureFilled(wager.exposure)
+    );
+  }
+
+  return false;
 }
 
 function canResolve(wager: PreDEXWager): boolean {
-  // Can resolve only after deadline
   const now = new Date().toISOString();
   return wager.deadline <= now;
 }
@@ -49,7 +63,6 @@ export function canTransitionTo(
   const allowed = ALLOWED_TRANSITIONS[wager.state] ?? [];
   if (!allowed.includes(nextState)) return false;
 
-  // State-specific guards
   switch (nextState) {
     case WAGER_STATES.LOCKED:
       return canLock(wager);
@@ -71,7 +84,9 @@ export function transitionWagerState(
   nextState: WagerState
 ): PreDEXWager {
   if (!canTransitionTo(wager, nextState)) {
-    throw new Error(`Invalid transition: ${wager.state} → ${nextState}`);
+    throw new Error(
+      `Invalid transition: ${wager.state} → ${nextState}`
+    );
   }
 
   return {

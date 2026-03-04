@@ -78,15 +78,11 @@ export default function QuickBetContractModal({
   const participantDirection = getOppositeDirection(creatorDirection);
 
   /* -----------------------------
-     HANDICAP GATE (V1)
-  ----------------------------- */
-  /* -----------------------------
     HANDICAP GATE (V2 - MARKET ONLY)
  ----------------------------- */
 
   // Only require handicap for Market-style wagers
-  const isMarketWager =
-    engineWager?.style === "MARKET";
+  const isMarketWager = false;
 
   // In the future, this could be engineWager?.requiresHandicap === true
   const missingHandicap =
