@@ -29,6 +29,11 @@ export async function getSigner() {
 }
 
 export async function ensureSepolia() {
+  if (!window.ethereum || !window.ethereum.selectedAddress) {
+    // wallet not connected yet — skip check
+    return;
+  }
+
   const provider = getProvider();
   const network = await provider.getNetwork();
 
