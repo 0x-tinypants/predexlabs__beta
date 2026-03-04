@@ -42,6 +42,9 @@ export default function Home({
 }: {
   currentUser: string | null;
 }) {
+
+  const walletAddress = window.ethereum?.selectedAddress ?? null;
+
   const viewerUserId = currentUser ?? null;
 
   const navigate = useNavigate();
