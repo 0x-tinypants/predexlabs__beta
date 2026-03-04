@@ -1,6 +1,5 @@
 import TileShell from "../ui/tile/TileShell";
-import "./marketTile.css";
-
+import "./MarketTile.css";
 import type { Market } from "../engine/market.types";
 
 export default function MarketTile({
