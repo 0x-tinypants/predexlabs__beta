@@ -138,13 +138,13 @@ export default function Home({
         const partyA = await escrow.partyA();
         const partyB = await escrow.partyB();
 
-        // if (
-        //   walletAddress &&
-        //   walletAddress !== partyA &&
-        //   walletAddress !== partyB
-        // ) {
-        //   continue;
-        // }
+        if (
+          walletAddress &&
+          walletAddress.toLowerCase() !== partyA.toLowerCase() &&
+          walletAddress.toLowerCase() !== partyB.toLowerCase()
+        ) {
+          continue;
+        }
 
         const stake = await escrow.stakeAmount();
         const chainState = Number(await escrow.state());
@@ -238,9 +238,10 @@ export default function Home({
 
     const interval = setInterval(() => {
       syncFromChain();
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(interval);
+
   }, [walletAddress]);
   /* -----------------------------
      CREATE WAGER
