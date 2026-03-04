@@ -9,13 +9,18 @@ export async function connectWallet() {
 
   const provider = new ethers.BrowserProvider(window.ethereum);
 
+  // Request wallet connection
   await provider.send("eth_requestAccounts", []);
 
   const signer = await provider.getSigner();
   const address = await signer.getAddress();
-  const network = await provider.getNetwork();
 
-  const chainId = Number(network.chainId);
+  // 🔥 Get chain directly from MetaMask
+  const chainIdHex = await window.ethereum.request({
+    method: "eth_chainId",
+  });
+
+  const chainId = parseInt(chainIdHex, 16);
 
   if (chainId !== SEPOLIA_CHAIN_ID) {
     throw new Error("Please switch to Sepolia network");
