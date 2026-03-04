@@ -1,0 +1,28 @@
+/* =========================================
+   CONTRACT LAYOUT — STRUCTURE ONLY
+========================================= */
+
+.contract-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.contract-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contract-panel-full {
+  grid-column: 1 / -1;
+}
+
+.contract-row {
+  display: flex;
+  gap: 12px;
+}
+
+.contract-row.compact > * {
+  flex: 1;
+}

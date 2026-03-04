@@ -1,0 +1,47 @@
+/* =========================================================
+   MARKET TILE — CONTENT ONLY
+   (Frame handled by TileShell)
+========================================================= */
+
+.market-tile {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.market-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.market-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.market-sub {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.market-meta {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.market-footer {
+  font-size: 11px;
+  opacity: 0.65;
+  font-weight: 600;
+}
+
+/* Badge */
+.badge-market {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #00d0ff;
+}

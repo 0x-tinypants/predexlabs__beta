@@ -1,0 +1,151 @@
+/* =========================================================
+   FILTER RAIL — OUTER SHELL
+   Controls: centering + vertical spacing in page flow
+   Mirrors header shell behavior
+========================================================= */
+
+.filter-rail-shell {
+  margin: 0 auto 28px;
+  display: flex;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   FILTER RAIL — CORE BAR
+   Controls: glass rail + glow edges
+========================================================= */
+
+.filter-rail {
+  width: 100%;
+  max-width: 900px; /* ~70% desktop width */
+  height: 44px;
+
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+
+  padding: 0 18px;
+
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+
+  position: relative;
+}
+
+
+/* =========================================================
+   FILTER RAIL — TOP & BOTTOM GLOW EDGES
+   Rail feel (not a pill, not a card)
+========================================================= */
+
+.filter-rail::before,
+.filter-rail::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  height: 2px;
+
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(120, 255, 120, 0.28),
+    transparent
+  );
+
+  filter: blur(6px);
+}
+
+.filter-rail::before {
+  top: -6px;
+}
+
+.filter-rail::after {
+  bottom: -6px;
+}
+
+
+/* =========================================================
+   FILTER RAIL — ZONES
+========================================================= */
+
+.filter-left,
+.filter-center,
+.filter-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Left: date */
+.filter-left {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Center: slogan */
+.filter-center {
+  justify-content: center;
+  text-align: center;
+}
+
+.filter-slogan {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+/* Right: filters button */
+.filter-right {
+  justify-content: flex-end;
+}
+
+
+/* =========================================================
+   FILTER BUTTON — GHOST VARIANT
+   Same behavior family as Friends tile button
+========================================================= */
+
+.filter-button {
+  padding: 6px 14px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+
+  background: transparent;
+  color: #fff;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.filter-button:hover {
+  background: rgba(120, 255, 120, 0.18);
+  border-color: var(--glow-green);
+}
+
+.create-button {
+  background: linear-gradient(90deg, #dbf93a, #58dd53);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: transform 0.15s ease;
+}
+
+.create-button:hover {
+  transform: scale(1.05);
+}

@@ -1,0 +1,302 @@
+/* =========================================================
+   PREDEX — MARKET HQ (SCOPED)
+   Everything is scoped under .market-page to avoid collisions
+========================================================= */
+
+.market-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.market-page .market-back {
+  margin-bottom: 16px;
+}
+
+.market-page .market-back button {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.75);
+
+  transition: 0.18s ease;
+}
+
+.market-page .market-back button:hover {
+  border-color: rgba(88, 221, 83, 0.35);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================================================
+   TOP GRID (INFO + SIDEBAR)
+========================================================= */
+
+.market-page .market-top {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 1000px) {
+  .market-page .market-top {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   SHARED CARD STYLE
+========================================================= */
+
+.market-page .market-card,
+.market-page .market-sidebar,
+.market-page .contracts-section {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.015)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 18px;
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    0 0 50px rgba(88, 221, 83, 0.06);
+
+  overflow: hidden;
+}
+
+/* =========================================================
+   MARKET INFO CARD (LEFT)
+========================================================= */
+
+.market-page .market-label {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(88, 221, 83, 0.70);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.market-page .market-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.3px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.market-page .market-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.market-page .market-meta {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* subtle divider */
+.market-page .divider {
+  height: 1px;
+  margin: 16px 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* parameters label */
+.market-page .card-label {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 12px;
+  font-weight: 650;
+}
+
+/* parameters grid */
+.market-page .param-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.market-page .param-grid span {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.50);
+  margin-bottom: 4px;
+}
+
+.market-page .param-grid strong {
+  font-size: 15px;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* =========================================================
+   SIDEBAR (CONTESTANTS PANEL)
+   ContestantPanel has its own internal classes;
+   we style the container and common scrolling.
+========================================================= */
+
+.market-page .market-sidebar {
+  height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* If your ContestantPanel uses these classes, keep them scoped */
+.market-page .contestant-header {
+  margin-bottom: 10px;
+}
+
+.market-page .contestant-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* scrollbar (subtle) */
+.market-page .contestant-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.market-page .contestant-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+}
+
+.market-page .contestant-row {
+  padding: 6px 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.market-page .contestant-row:hover {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* =========================================================
+   CONTRACTS SECTION
+========================================================= */
+
+.market-page .contracts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.market-page .contracts-header h3 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Generate button */
+.market-page .generate-btn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(88, 221, 83, 0.35);
+  background: rgba(88, 221, 83, 0.08);
+  color: rgba(219, 249, 58, 0.95);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.market-page .generate-btn:hover {
+  border-color: rgba(88, 221, 83, 0.60);
+  background: rgba(88, 221, 83, 0.12);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.40);
+}
+
+/* contract grid */
+.market-page .contracts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+/* contract card */
+.market-page .contract-card {
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  transition: 0.18s ease;
+}
+
+.market-page .contract-card:hover {
+  border-color: rgba(88, 221, 83, 0.28);
+  transform: translateY(-2px);
+}
+
+.market-page .contract-name {
+  font-weight: 650;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.market-page .contract-line {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.62);
+  margin-bottom: 12px;
+}
+
+/* action buttons */
+.market-page .contract-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.market-page .contract-actions button {
+  flex: 1;
+  height: 34px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 650;
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.80);
+
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.market-page .contract-actions button:hover {
+  border-color: rgba(88, 221, 83, 0.40);
+  background: rgba(88, 221, 83, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* empty */
+.market-page .contracts-empty {
+  margin-top: 14px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}

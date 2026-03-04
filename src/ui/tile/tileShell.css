@@ -1,0 +1,105 @@
+/* =========================================
+   PREDEX TILE SHELL — GLOBAL STANDARD
+   Controls size, structure, hover behavior
+   ========================================= */
+
+.tile-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  /* 🔒 GLOBAL TILE SIZE */
+  min-height: 240px;
+
+  /* 🔒 SPACING */
+  padding: 20px;
+  border-radius: 18px;
+
+  /* 🔒 GLASS BACKGROUND */
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.015)
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* 🔒 DEPTH */
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  cursor: pointer;
+}
+
+
+/* =========================================
+   INTERACTIVE STATE
+   ========================================= */
+
+.tile-shell[data-interactive="true"]:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 255, 200, 0.45);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+}
+
+
+/* =========================================
+   BADGE (Top-Left Overlay)
+   ========================================= */
+
+.tile-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+
+  z-index: 3;
+}
+
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.tile-header {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+
+/* =========================================
+   BODY
+   Expands to fill remaining space
+   ========================================= */
+
+.tile-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  position: relative;
+  z-index: 2;
+}
+
+
+/* =========================================
+   META / FOOTER
+   Pinned to bottom automatically
+   ========================================= */
+
+.tile-meta {
+  margin-top: auto;
+
+  font-size: 12px;
+  opacity: 0.65;
+}

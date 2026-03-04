@@ -1,0 +1,266 @@
+/* =========================================================
+   OPEN BET TILE — PREMIUM STYLE
+========================================================= */
+
+.open-bet-tile {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
+  background:
+    radial-gradient(
+      120% 120% at 0% 0%,
+      rgba(20, 80, 50, 0.25),
+      rgba(10, 20, 15, 0.6) 60%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 12, 10, 0.95),
+      rgba(5, 8, 7, 0.98)
+    );
+
+  border: 1px solid rgba(80, 255, 160, 0.08);
+
+}
+
+/* ---------------- HEADER ---------------- */
+
+.open-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.open-title {
+  font-size: 17px;      /* smaller */
+  font-weight: 600;     /* lighter than 700 */
+  letter-spacing: 0.2px;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.25;
+}
+
+.state-badge.OPEN {
+  padding: 6px 16px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+
+  color: #7bffb6;
+
+  background: rgba(20, 60, 40, 0.6);
+
+  border: 1px solid rgba(123,255,182,0.35);
+
+  box-shadow:
+    0 0 10px rgba(123,255,182,0.45);
+}
+
+/* ---------------- CONTEXT ---------------- */
+
+.open-context {
+  font-size: 13px;
+  opacity: 0.6;
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+}
+
+/* ---------------- TARGET LINE ---------------- */
+
+.open-target-line {
+  margin-top: -5px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.open-target-line::before {
+  content: "LINE";
+  font-size: 11px;
+  letter-spacing: 2px;
+  opacity: 0.35;
+  font-weight: 600;
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+.open-direction-row {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.open-direction-row .dir {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  font-size: 13px;
+
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.65);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  transition: 
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+
+  cursor: pointer;
+}
+
+.open-direction-row .dir.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  cursor: default;
+}
+
+/* 🔥 HOVER STATE (no :not disabled logic anymore) */
+.open-direction-row .dir.selectable:hover {
+  background: linear-gradient(135deg, #7bffb6, #4bdc8f);
+  color: #05110a;
+
+  box-shadow:
+    0 8px 24px rgba(123, 255, 182, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+
+  transform: translateY(-3px);
+}
+
+/* Optional pressed state */
+.open-direction-row .dir.selectable:active {
+  transform: translateY(-1px);
+}
+
+.open-direction-row button {
+  position: relative;
+  z-index: 5;
+}
+
+/* ---------------- EXPOSURE ---------------- */
+
+.open-exposure {
+  margin-top: 14px;
+}
+
+.open-exposure-label {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+.open-exposure-bar {
+  height: 8px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.open-exposure-fill {
+  height: 100%;
+  background: linear-gradient(90deg,#7bffb6,#4bdc8f);
+  box-shadow: 0 0 14px rgba(123,255,182,0.6);
+  transition: width 0.4s ease;
+  animation: pulseBar 2.2s ease-in-out infinite;
+}
+
+@keyframes pulseBar {
+  0% { box-shadow: 0 0 10px rgba(123,255,182,0.4); }
+  50% { box-shadow: 0 0 18px rgba(123,255,182,0.7); }
+  100% { box-shadow: 0 0 10px rgba(123,255,182,0.4); }
+}
+
+/* ---------------- PARTICIPANT CIRCLES ---------------- */
+
+.open-exposure-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -5px;
+  margin-bottom: 6px;
+}
+
+.open-participants {
+  display: flex;
+  align-items: center;
+}
+
+.open-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  margin-left: -8px;
+}
+
+.open-circle:first-child {
+  margin-left: 0;
+}
+
+.open-circle.extra {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.05);
+}
+
+/* ---------------- META ---------------- */
+
+.open-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  opacity: 0.65;
+  margin-top: 0px;
+}
+
+.open-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* controls spacing between circle and name */
+}
+
+.meta-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+.open-meta-time {
+  white-space: nowrap;
+}
+
+/* ---------------- DISABLED STATE ---------------- */
+
+.open-direction-row .dir:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Ensure disabled buttons do NOT glow */
+.open-direction-row .dir:disabled:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.65);
+  box-shadow: none;
+  transform: none;
+}

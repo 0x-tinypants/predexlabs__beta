@@ -1,0 +1,197 @@
+/* =========================================
+   PREDEX — MARKET FORM
+========================================= */
+
+.market-form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* =========================================
+   SECTION CARDS
+========================================= */
+
+.market-section {
+  padding: 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Section Header Label */
+.market-section > .market-label:first-child {
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(88, 221, 83, 0.7);
+  font-weight: 600;
+}
+
+/* =========================================
+   GROUPS
+========================================= */
+
+.market-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.market-label {
+  font-size: 11px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+/* =========================================
+   ROW LAYOUT
+========================================= */
+
+.market-row {
+  display: flex;
+  gap: 16px;
+}
+
+.market-row .market-group {
+  flex: 1;
+}
+
+/* =========================================
+   INPUTS
+========================================= */
+
+.market-form input,
+.market-form select {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #eafff4;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+.market-form input:focus,
+.market-form select:focus {
+  outline: none;
+  border-color: rgba(88, 221, 83, 0.4);
+  box-shadow: 0 0 0 1px rgba(88, 221, 83, 0.25);
+}
+
+/* Derived (read-only) fields look softer */
+.market-form input[readonly] {
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: default;
+}
+
+/* =========================================
+   UPLOAD AREA
+========================================= */
+
+.market-file {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.market-file input[type="file"] {
+  flex: 1;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px dashed rgba(88, 221, 83, 0.4);
+  background: rgba(88, 221, 83, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+
+.market-file input[type="file"]:hover {
+  background: rgba(88, 221, 83, 0.08);
+}
+
+/* =========================================
+   CONTESTANT LIST
+========================================= */
+
+.market-contestant-list {
+  margin-top: 12px;
+  max-height: 160px;
+  overflow-y: auto;
+  border-radius: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.market-contestant-meta {
+  font-size: 12px;
+  margin-bottom: 10px;
+  color: rgba(88, 221, 83, 0.8);
+}
+
+.market-contestant-item {
+  font-size: 13px;
+  padding: 4px 0;
+  opacity: 0.8;
+}
+
+/* =========================================
+   ERROR
+========================================= */
+
+.market-error {
+  font-size: 13px;
+  color: #ff5c5c;
+  margin-top: 6px;
+}
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.market-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.market-primary {
+  height: 44px;
+  padding: 0 28px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 600;
+  background: linear-gradient(135deg, #dbf93a, #58dd53);
+  color: #0b0f0d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.market-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(88, 221, 83, 0.3);
+}
+
+.market-secondary {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.market-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}

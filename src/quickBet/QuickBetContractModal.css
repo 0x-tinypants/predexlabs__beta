@@ -1,0 +1,266 @@
+/* =========================================================
+   QUICK BET — MODAL OVERLAY
+========================================================= */
+
+.quickbet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================================================
+   QUICK BET — MODAL CONTAINER
+========================================================= */
+
+.quickbet-modal {
+  width: 420px;
+  max-width: 92vw;
+
+  padding: 28px 26px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(30, 32, 36, 0.92),
+    rgba(18, 20, 24, 0.92)
+  );
+
+  border-radius: 22px;
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.55),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+
+  color: #f0f0f0;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.quickbet-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+
+.quickbet-subtitle {
+  font-size: 13px;
+  opacity: 0.65;
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   CONTRACT SUMMARY
+========================================================= */
+
+.contract-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding-top: 16px;
+  margin-top: 8px;
+
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.contract-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.contract-row .label {
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+.contract-row .value {
+  text-align: right;
+  font-weight: 500;
+  max-width: 65%;
+  word-break: break-word;
+}
+
+/* =========================================================
+   CONTRACT — CORE CLAUSE (CONDITION)
+========================================================= */
+
+.contract-row.condition .value {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* =========================================================
+   CONTRACT DESCRIPTION (SUPPORTING DETAILS)
+========================================================= */
+
+.contract-description {
+  margin-top: 16px;
+  padding-top: 12px;
+
+  font-size: 12.5px;
+  line-height: 1.5;
+
+  color: rgba(255,255,255,0.6);
+
+  border-top: 1px dashed rgba(255,255,255,0.08);
+}
+
+.description-label {
+  display: block;
+  margin-bottom: 4px;
+
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+
+  opacity: 0.5;
+}
+
+/* =========================================================
+   WAGER AMOUNT INPUT
+========================================================= */
+
+.wager-amount {
+  margin-top: 18px;
+  padding-top: 14px;
+
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.amount-label {
+  display: block;
+  margin-bottom: 6px;
+
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+
+  color: rgba(255,255,255,0.6);
+}
+
+.amount-input {
+  width: 100%;
+  padding: 10px 12px;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+
+  outline: none;
+}
+
+.amount-input::placeholder {
+  color: rgba(255,255,255,0.35);
+}
+
+.amount-input:focus {
+  border-color: rgba(123,255,182,0.6);
+  box-shadow: 0 0 0 2px rgba(123,255,182,0.18);
+}
+
+.amount-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+
+/* =========================================================
+   CONFIRM ACTIONS
+========================================================= */
+
+.confirm-button {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px 0;
+
+  border-radius: 14px;
+  border: none;
+
+  background: linear-gradient(
+    135deg,
+    #7bffb6,
+    #4bdc8f
+  );
+
+  color: #0c1410;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.confirm-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(123,255,182,0.45);
+}
+
+.confirm-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* =========================================================
+   FOOTER / ACTIONS
+========================================================= */
+
+.quickbet-footer {
+  margin-top: 24px;
+  padding-top: 14px;
+
+  border-top: 1px solid rgba(255,255,255,0.06);
+
+  text-align: center;
+}
+
+.quickbet-close {
+  background: none;
+  border: none;
+
+  color: rgba(255,255,255,0.65);
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.quickbet-close:hover {
+  color: rgba(255,255,255,0.9);
+}
+
+.handicap-warning {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 80, 80, 0.10);
+  border: 1px solid rgba(255, 80, 80, 0.28);
+  color: rgba(255, 190, 190, 0.95);
+  font-size: 13px;
+  line-height: 1.3;
+}

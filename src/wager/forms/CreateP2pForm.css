@@ -1,0 +1,159 @@
+/* =========================================
+   PREDEX — P2P WAGER FORM
+========================================= */
+
+.p2p-container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* =========================================
+   HERO DESCRIPTION
+========================================= */
+
+.p2p-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.p2p-hero label {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(88, 221, 83, 0.7);
+  font-weight: 600;
+}
+
+.p2p-hero textarea {
+  min-height: 120px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #eafff4;
+  font-size: 14px;
+  resize: vertical;
+  transition: all 0.15s ease;
+}
+
+.p2p-hero textarea:focus {
+  outline: none;
+  border-color: rgba(88, 221, 83, 0.4);
+  box-shadow: 0 0 0 1px rgba(88, 221, 83, 0.25);
+}
+
+/* =========================================
+   PANELS
+========================================= */
+
+.p2p-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  padding: 20px;
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* =========================================
+   ROW (LINE + DEADLINE)
+========================================= */
+
+.p2p-row {
+  display: flex;
+  gap: 16px;
+}
+
+.p2p-row .p2p-field {
+  flex: 1;
+}
+
+/* =========================================
+   FIELDS
+========================================= */
+
+.p2p-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.p2p-field label {
+  font-size: 11px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.p2p-field input {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #eafff4;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+.p2p-field input:focus {
+  outline: none;
+  border-color: rgba(88, 221, 83, 0.4);
+  box-shadow: 0 0 0 1px rgba(88, 221, 83, 0.25);
+}
+
+/* =========================================
+   ACTIONS
+========================================= */
+
+.p2p-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.p2p-cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.p2p-cancel:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.p2p-primary {
+  height: 42px;
+  padding: 0 28px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  background: linear-gradient(135deg, #dbf93a, #58dd53);
+  color: #0b0f0d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.p2p-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(88, 221, 83, 0.3);
+}
+
+.p2p-primary:active {
+  transform: translateY(0);
+}

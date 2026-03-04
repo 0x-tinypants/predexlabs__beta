@@ -1,0 +1,26 @@
+/* =========================================================
+   Wager Section
+========================================================= */
+
+.wager-section {
+  margin-top: 28px;
+}
+
+.wager-section-title {
+  margin-bottom: 18px;
+
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* =========================================================
+   Wager Grid — Marketplace Layout
+========================================================= */
+.wager-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+
