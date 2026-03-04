@@ -32,10 +32,16 @@ export async function connectWallet() {
 
   console.log("STEP 6: Parsed chainId:", chainId);
 
-  if (chainId !== SEPOLIA_CHAIN_ID) {
-    console.log("STEP 7: WRONG NETWORK");
-    throw new Error("Please switch to Sepolia network");
-  }
+ if (chainId !== SEPOLIA_CHAIN_ID) {
+  console.log("Switching to Sepolia...");
+
+  await window.ethereum.request({
+    method: "wallet_switchEthereumChain",
+    params: [{ chainId: "0xaa36a7" }], // Sepolia
+  });
+
+  console.log("Network switched to Sepolia");
+}
 
   console.log("STEP 8: NETWORK OK");
 
