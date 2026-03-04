@@ -22,29 +22,39 @@ export async function connectWallet() {
 
   console.log("STEP 4: Address:", address);
 
-  const chainIdHex = await window.ethereum.request({
+  let chainIdHex = await window.ethereum.request({
     method: "eth_chainId",
   });
 
+  let chainId = parseInt(chainIdHex, 16);
+
   console.log("STEP 5: Raw chainId:", chainIdHex);
-
-  const chainId = parseInt(chainIdHex, 16);
-
   console.log("STEP 6: Parsed chainId:", chainId);
 
- if (chainId !== SEPOLIA_CHAIN_ID) {
-  console.log("Switching to Sepolia...");
+  if (chainId !== SEPOLIA_CHAIN_ID) {
+    console.log("Switching to Sepolia...");
 
-  await window.ethereum.request({
-    method: "wallet_switchEthereumChain",
-    params: [{ chainId: "0xaa36a7" }], // Sepolia
-  });
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0xaa36a7" }],
+    });
 
-  console.log("Network switched to Sepolia");
-}
+    // wait a moment for MetaMask to finish switching
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // re-check the network after switching
+    chainIdHex = await window.ethereum.request({
+      method: "eth_chainId",
+    });
+
+    chainId = parseInt(chainIdHex, 16);
+
+    console.log("STEP 7: Updated chainId:", chainId);
+  }
 
   console.log("STEP 8: NETWORK OK");
 
+  console.log("STEP 8: NETWORK OK");
   return {
     provider,
     signer,
