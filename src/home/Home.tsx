@@ -1,8 +1,11 @@
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
+import { getWagerMetadataByEscrow } from "../services/wager.service";
 
-import "../firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
+import { createWagerRecord } from "../services/wager.service";
 
 /* UI */
 import FilterBar from "../filters/FilterBar";
@@ -12,10 +15,10 @@ import QuickBetContractModal from "../quickBet/QuickBetContractModal";
 import ResolvedColumn from "./ResolvedColumn";
 import MarketTile from "./MarketTile";
 import type { CombinedTile } from "./WagerSection";
+import { recordResolvedWager } from "../services/history.service";
 /* Types */
 import type { Wager } from "../wager";
 import type { PreDEXWager, CounterWager } from "../engine/predex.types";
-
 /* Engine */
 import { createWager } from "../engine/wager.engine";
 import { acceptCounterWager } from "../engine/counterWager.engine";
@@ -36,6 +39,8 @@ import {
   getEscrow,
   FACTORY_ADDRESS
 } from "../blockchain/contracts";
+import { runTransaction } from "../blockchain/runTransaction";
+
 
 export default function Home({
   currentUser,
@@ -43,9 +48,21 @@ export default function Home({
   currentUser: string | null;
 }) {
 
-  const walletAddress = window.ethereum?.selectedAddress ?? null;
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
-  const viewerUserId = currentUser ?? null;
+  useEffect(() => {
+    if (!window.ethereum) return;
+
+    window.ethereum.request({ method: "eth_accounts" }).then((accounts: string[]) => {
+      setWalletAddress(accounts[0] ?? null);
+    });
+
+    window.ethereum.on("accountsChanged", (accounts: string[]) => {
+      setWalletAddress(accounts[0] ?? null);
+    });
+  }, []);
+
+  const viewerUserId = currentUser?.toLowerCase() ?? null;
 
   const navigate = useNavigate();
 
@@ -57,6 +74,14 @@ export default function Home({
     const stored = localStorage.getItem("predex_engine_wagers");
     return stored ? JSON.parse(stored) : [];
   });
+
+  const engineWagersRef = useRef<PreDEXWager[]>(engineWagers);
+
+  useEffect(() => {
+    engineWagersRef.current = engineWagers;
+  }, [engineWagers]);
+
+  const syncingRef = useRef(false);
 
   const [counterWagers, setCounterWagers] = useState<CounterWager[]>(() => {
     const stored = localStorage.getItem("predex_counter_wagers");
@@ -73,6 +98,8 @@ export default function Home({
   ----------------------------- */
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+  /* Transaction loader */
 
   const { intent, openQuickBet, clearQuickBet } = useQuickBetIntent();
   const claimableStates = ["CLAIMABLE", "RESOLVING"] as const;
@@ -94,50 +121,68 @@ export default function Home({
     return () => clearInterval(id);
   }, []);
 
-
   // 🔥 OUTSIDE useEffect
   async function syncFromChain() {
+    if (!window.ethereum) return;
+
+    // Prevent overlapping calls (interval + tx triggers)
+    if (syncingRef.current) return;
+    syncingRef.current = true;
+
     try {
-
-      // 🔒 Skip if wallet not connected yet
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
-
-      if (chainId !== "0xaa36a7") {
-        return;
-      }
-
-      const factory = await getFactory();
-
-      const windowSeconds = await factory.disputeWindowSeconds();
+      if (chainId !== "0xaa36a7") return;
 
       const provider = new ethers.BrowserProvider(window.ethereum);
+      const factory = await getFactory();
 
-      // 🔥 Pull all EscrowCreated events from factory
+      const latestBlock = await provider.getBlockNumber();
+
+      let lastSyncedBlock = Number(localStorage.getItem("predex_last_synced_block"));
+      if (!lastSyncedBlock) {
+        lastSyncedBlock = Math.max(latestBlock - 50000, 0);
+      }
+
+      // 1) Get newly created escrows since last sync
       const events = await factory.queryFilter(
         factory.filters.EscrowCreated(),
-        0,
-        "latest"
+        lastSyncedBlock,
+        latestBlock
       );
 
-      console.log("ESCROW EVENTS FOUND:", events.length);
+      // 2) Build set of escrow addresses to refresh:
+      //    - new ones from events
+      //    - existing P2P ones already in state
+      const addresses = new Set<string>();
 
-      if (!events.length) return;
+      for (const ev of events) {
+        if (!("args" in ev)) continue;
+        const addr = ev.args.escrow as string;
+        if (addr) addresses.add(addr);
+      }
 
-      const rebuilt: PreDEXWager[] = [];
+      for (const w of engineWagersRef.current) {
+        if (w.style === "P2P" && w.escrowAddress) {
+          addresses.add(w.escrowAddress);
+        }
+      }
 
-      for (const event of events) {
+      // Save checkpoint even if 0 events (otherwise you can re-scan same blocks)
+      localStorage.setItem("predex_last_synced_block", (latestBlock - 5).toString());
 
-        console.log("ESCROW EVENT RAW:", event);
+      if (addresses.size === 0) return;
 
-        if (!("args" in event)) continue;
+      // 3) Fetch on-chain data for each escrow and upsert into engine state
+      const updated: PreDEXWager[] = [];
 
-        const escrowAddress = event.args.escrow as string; if (!escrowAddress) continue;
 
+      for (const escrowAddress of addresses) {
         const escrow = await getEscrow(escrowAddress);
 
         const partyA = await escrow.partyA();
         const partyB = await escrow.partyB();
 
+        // Keep your “only show wagers involving my wallet” logic
         if (
           walletAddress &&
           walletAddress.toLowerCase() !== partyA.toLowerCase() &&
@@ -154,25 +199,77 @@ export default function Home({
         const proposedWinner = await escrow.proposedWinner();
         const disputed = await escrow.disputed();
 
-        // 🔥 Deterministic creation time from block
-        const block = await provider.getBlock(event.blockNumber);
-        if (!block) continue;
+        /* -----------------------------------
+           FETCH DESCRIPTION
+        ----------------------------------- */
 
-        const createdAtISO = new Date(
-          Number(block.timestamp) * 1000
-        ).toISOString();
+        let description = "Peer-to-Peer Wager";
+
+        try {
+          const metadata = await getWagerMetadataByEscrow(
+            escrowAddress
+          );
+
+          if (metadata?.description) {
+            description = metadata.description;
+          }
+        } catch (err) {
+          console.error("Failed to fetch wager metadata", err);
+        }
+
+        /* -----------------------------------
+           RECORD HISTORY IF RESOLVED
+        ----------------------------------- */
+
+        if (chainState === 4 && proposedWinner) {
+          try {
+            await recordResolvedWager({
+              escrowAddress,
+              winner: proposedWinner,
+              partyA,
+              partyB,
+              stake: Number(ethers.formatEther(stake)),
+              description
+            });
+          } catch (err) {
+            console.error("History write failed:", err);
+          }
+        }
+
+        /* -----------------------------------
+           COMPUTE CREATED TIME
+        ----------------------------------- */
+
+        let createdAtISO =
+          engineWagersRef.current.find(
+            (w) => w.style === "P2P" && w.escrowAddress === escrowAddress
+          )?.createdAt ?? null;
+
+        if (!createdAtISO) {
+          const block = await provider.getBlock(latestBlock);
+          createdAtISO = block
+            ? new Date(Number(block.timestamp) * 1000).toISOString()
+            : new Date().toISOString();
+        }
 
         const deadlineISO = new Date(
           Number(fundingDeadline) * 1000
         ).toISOString();
 
-        rebuilt.push({
+        /* -----------------------------------
+           BUILD UPDATED WAGER OBJECT
+        ----------------------------------- */
+
+        updated.push({
           id: escrowAddress,
           escrowAddress,
           style: "P2P",
           creatorId: partyA,
           partyA,
           partyB,
+
+          description,
+
           stakePerParticipant: Number(ethers.formatEther(stake)),
           deadline: deadlineISO,
           createdAt: createdAtISO,
@@ -180,7 +277,9 @@ export default function Home({
           disputeDeadline,
           proposedWinner,
           disputed,
+
           state: chainState as unknown as WagerState,
+
           resolution: {
             state: "PENDING",
             claims: [],
@@ -188,24 +287,42 @@ export default function Home({
         });
       }
 
-      // 🔥 Merge without wiping other wager types
-      setEngineWagers(prev => {
-        const nonP2P = prev.filter(w => w.style !== "P2P");
-        return [...nonP2P, ...rebuilt];
+      // 4) UPSERT: replace existing P2P wagers by id, keep non-P2P wagers untouched
+      setEngineWagers((prev) => {
+        const byId = new Map<string, PreDEXWager>();
+
+        // Start with previous wagers
+        for (const w of prev) byId.set(w.id, w);
+
+        // Upsert updated P2P
+        for (const w of updated) byId.set(w.id, w);
+
+        return Array.from(byId.values());
       });
-
-      if (rebuilt.length > 0) {
-        const newest = rebuilt[rebuilt.length - 1];
-
-        if (newest.style === "P2P") {
-          console.log("LATEST ESCROW:", newest.escrowAddress);
-        }
-      }
-
     } catch (err) {
       console.error("Chain sync failed:", err);
+    } finally {
+      syncingRef.current = false;
     }
+  }
 
+
+  async function debugProfileHistory(wallet: string) {
+    const snap = await getDocs(
+      collection(db, "profiles", wallet.toLowerCase(), "history")
+    );
+
+    const rows: any[] = [];
+
+    snap.forEach((doc) => {
+      rows.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    console.log("HISTORY COUNT:", rows.length);
+    console.table(rows);
   }
   /* -----------------------------
    LOCAL PERSISTENCE
@@ -232,17 +349,14 @@ export default function Home({
   }, [engineMarkets]);
 
   useEffect(() => {
-    if (!walletAddress) return;
+  if (!walletAddress) return;
 
-    syncFromChain();
+  syncFromChain();
 
-    const interval = setInterval(() => {
-      syncFromChain();
-    }, 5000);
+  // DEBUG: inspect profile history
+  debugProfileHistory(walletAddress);
 
-    return () => clearInterval(interval);
-
-  }, [walletAddress]);
+}, [walletAddress]);
   /* -----------------------------
      CREATE WAGER
   ----------------------------- */
@@ -252,8 +366,13 @@ export default function Home({
   }
 
   async function handleSubmitWager(payload: any) {
-    if (!viewerUserId) return;
 
+    console.log("SUBMIT PAYLOAD:", payload);
+
+    if (!walletAddress) {
+      console.error("Wallet not connected");
+      return;
+    }
     /* =============================
        MARKET SUBMISSION
     ============================= */
@@ -292,6 +411,7 @@ export default function Home({
       // =========================
       if (payload.style === "P2P") {
         try {
+
           if (!window.ethereum) {
             console.error("No wallet found");
             return;
@@ -329,6 +449,26 @@ export default function Home({
 
           const escrowAddress = event.args.escrow;
 
+          await createWagerRecord({
+            escrowAddress: escrowAddress,
+            description: payload.description,
+            partyA: walletAddress,
+            partyB: payload.sideB,
+            stake: payload.stakePerParticipant,
+            deadline: payload.deadline,
+          });
+
+          /* =========================================
+             NEW — STORE DESCRIPTION LOCALLY
+          ========================================= */
+
+          localStorage.setItem(
+            `predex_p2p_desc_${escrowAddress}`,
+            payload.description ?? ""
+          );
+
+          /* ========================================= */
+
           // Create escrow contract instance
           const escrowContract = await getEscrow(escrowAddress);
 
@@ -339,6 +479,7 @@ export default function Home({
           const winner = await escrowContract.winner();
 
           await syncFromChain();
+
 
         } catch (err) {
           console.error("P2P on-chain creation failed:", err);
@@ -465,7 +606,7 @@ export default function Home({
       if (!window.ethereum) return;
 
       const escrow = await getEscrow(wagerId);
-      // 🔥 Find the wager in state
+
       const wager = engineWagers.find((w) => w.id === wagerId);
 
       if (!wager || wager.style !== "P2P") {
@@ -475,11 +616,9 @@ export default function Home({
 
       const stake = await escrow.stakeAmount();
 
-      const tx = await escrow.deposit({ value: stake });
-
-
-      await tx.wait();
-
+      await runTransaction(
+        escrow.deposit({ value: stake })
+      );
 
     } catch (err) {
       console.error("Deposit failed:", err);
@@ -505,8 +644,9 @@ export default function Home({
 
       const escrow = await getEscrow(escrowAddress);
 
-      const tx = await escrow.proposeWinner(winner);
-      await tx.wait();
+      await runTransaction(
+        escrow.proposeWinner(winner)
+      );
 
       await syncFromChain();
 
@@ -514,6 +654,7 @@ export default function Home({
 
     } catch (err) {
       console.error("❌ Propose winner failed:", err);
+    } finally {
     }
   }
 
@@ -526,8 +667,9 @@ export default function Home({
 
       console.log("Finalizing escrow:", escrowAddress);
 
-      const tx = await escrow.finalize();
-      await tx.wait();
+      await runTransaction(
+        escrow.finalize()
+      );
 
       console.log("✅ Escrow finalized");
 
@@ -535,6 +677,7 @@ export default function Home({
 
     } catch (err) {
       console.error("❌ Finalize failed:", err);
+    } finally {
     }
   }
 
@@ -582,15 +725,15 @@ export default function Home({
         return;
       }
 
-      const escrowAddress = firstP2P;
+      const escrowAddress = firstP2P.escrowAddress;
 
       const escrow = await getEscrow(escrowAddress);
 
       const stake = await escrow.stakeAmount();
 
-      const tx = await escrow.deposit({ value: stake });
-
-      await tx.wait();
+      await runTransaction(
+        escrow.deposit({ value: stake })
+      );
 
       const updatedState = await escrow.state();
 
@@ -623,7 +766,6 @@ export default function Home({
      DERIVED UI WAGERS
   ----------------------------- */
   const uiWagers: Wager[] = useMemo(() => {
-    if (!viewerUserId) return [];
 
 
     return [...engineWagers]
@@ -708,81 +850,68 @@ export default function Home({
   }, [engineMarkets, activeWagers]);
 
 
-
-  /* -----------------------------
-     AUTH GATE
-  ----------------------------- */
-  if (!viewerUserId) {
-    return (
-      <div className="home">
-        <div style={{ padding: 24, opacity: 0.6 }}>
-          Select a user to begin.
-        </div>
-      </div>
-    );
-  }
-
-
   /* -----------------------------
      RENDER
   ----------------------------- */
   return (
-    <div className="content-rail content-rail--full">
+    <>
+      <div className="content-rail content-rail--full">
 
-      <FilterBar
-        onCreate={handleOpenCreate}
-      />
-      <WagerSection
-        title="Sports"
-        wagers={combinedTiles}
-        currentUserId={walletAddress ?? ""}
-        onQuickBet={openQuickBet}
-        onAcceptP2P={handleAcceptP2P}
-        onDeclineP2P={handleDeclineP2P}
-        onSelectWinnerP2P={handleSelectWinnerP2P}
-        onClaimP2P={handleClaimP2P}
-      />
-
-
-      {showCreateModal && activeCategory && (
-        <CreateWagerModal
-          category={activeCategory}
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={handleSubmitWager}
+        <FilterBar
+          onCreate={handleOpenCreate}
         />
-      )}
-
-      <QuickBetContractModal
-        open={!!intent}
-        onClose={clearQuickBet}
-        intent={intent}
-        wagers={uiWagers}
-        engineWagers={engineWagers}
-        counterWagers={counterWagers}
-        onAccept={handleAcceptCounterWager}
-        currentUser={{
-          id: viewerUserId,
-          handicapIndex: null,
-        }}
-      />
+        <WagerSection
+          title="Sports"
+          wagers={combinedTiles}
+          currentUserId={walletAddress ?? ""}
+          onQuickBet={openQuickBet}
+          onAcceptP2P={handleAcceptP2P}
+          onDeclineP2P={handleDeclineP2P}
+          onSelectWinnerP2P={handleSelectWinnerP2P}
+          onClaimP2P={handleClaimP2P}
+        />
 
 
-      <button
-        style={{
-          marginTop: 24,
-          padding: 8,
-          background: "#300",
-          color: "white",
-          border: "none",
-          borderRadius: 4,
-        }}
-        onClick={resetAll}
-      >
-        Reset All (Dev)
-      </button>
+        {showCreateModal && activeCategory && (
+          <CreateWagerModal
+            category={activeCategory}
+            onClose={() => setShowCreateModal(false)}
+            onSubmit={handleSubmitWager}
+          />
+        )}
 
-      <ResolvedColumn wagers={resolvedWagers} />
+        <QuickBetContractModal
+          open={!!intent}
+          onClose={clearQuickBet}
+          intent={intent}
+          wagers={uiWagers}
+          engineWagers={engineWagers}
+          counterWagers={counterWagers}
+          onAccept={handleAcceptCounterWager}
+          currentUser={{
+            id: viewerUserId ?? "",
+            handicapIndex: null,
+          }}
+        />
 
-    </div>
+
+        <button
+          style={{
+            marginTop: 24,
+            padding: 8,
+            background: "#300",
+            color: "white",
+            border: "none",
+            borderRadius: 4,
+          }}
+          onClick={resetAll}
+        >
+          Reset All (Dev)
+        </button>
+
+        <ResolvedColumn wagers={resolvedWagers} />
+
+      </div>
+    </>
   );
 }

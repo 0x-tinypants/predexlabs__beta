@@ -1,12 +1,17 @@
 /* =========================================
    PREDEX TILE SHELL — GLOBAL STANDARD
    Controls size, structure, hover behavior
-   ========================================= */
+========================================= */
 
 .tile-shell {
   position: relative;
+
   display: flex;
   flex-direction: column;
+
+  /* Grid safety */
+  width: 100%;
+  min-width: 0;
 
   /* 🔒 GLOBAL TILE SIZE */
   min-height: 240px;
@@ -28,9 +33,9 @@
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
 
   transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 
   cursor: pointer;
 }
@@ -38,27 +43,51 @@
 
 /* =========================================
    INTERACTIVE STATE
-   ========================================= */
+========================================= */
 
 .tile-shell[data-interactive="true"]:hover {
   transform: translateY(-4px);
-  border-color: rgba(0, 255, 200, 0.45);
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+
+  border-color: rgba(88,221,83,0.55);
+
+  box-shadow:
+    0 18px 38px rgba(0,0,0,0.55),
+    0 0 16px rgba(88,221,83,0.25);
+
+  animation: tileGlowPulse 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes tileGlowPulse {
+
+  from {
+    box-shadow:
+      0 18px 38px rgba(0,0,0,0.55),
+      0 0 14px rgba(88,221,83,0.22);
+  }
+
+  to {
+    box-shadow:
+      0 20px 42px rgba(0,0,0,0.65),
+      0 0 24px rgba(88,221,83,0.45);
+  }
+
 }
 
 
 /* =========================================
    BADGE (Top-Left Overlay)
-   ========================================= */
+========================================= */
 
 .tile-badge {
   position: absolute;
+
   top: 14px;
   left: 14px;
 
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+
   opacity: 0.75;
 
   z-index: 3;
@@ -67,11 +96,12 @@
 
 /* =========================================
    HEADER
-   ========================================= */
+========================================= */
 
 .tile-header {
   font-weight: 600;
   font-size: 16px;
+
   margin-bottom: 14px;
 }
 
@@ -79,12 +109,14 @@
 /* =========================================
    BODY
    Expands to fill remaining space
-   ========================================= */
+========================================= */
 
 .tile-body {
   flex: 1;
+
   display: flex;
   flex-direction: column;
+
   gap: 12px;
 
   position: relative;
@@ -95,7 +127,7 @@
 /* =========================================
    META / FOOTER
    Pinned to bottom automatically
-   ========================================= */
+========================================= */
 
 .tile-meta {
   margin-top: auto;

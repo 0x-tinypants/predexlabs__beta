@@ -28,7 +28,7 @@ import type { Market } from "../engine/market.types";
  * If your file exports differ, change these imports accordingly.
  */
 import { getEscrow, getProvider } from "../blockchain/contracts";
-
+import { runTransaction } from "../blockchain/runTransaction";
 /* =========================================================
    DIRECTION VALIDATION (OPEN BET ONLY)
 ========================================================= */
@@ -265,6 +265,27 @@ export function useWagers() {
 
     try {
       const provider = getProvider();
+
+      /*
+      =====================================
+      BLOCK BACKFILL SAFETY
+      =====================================
+      */
+
+      const latestBlock = await provider.getBlockNumber();
+
+      const stored = localStorage.getItem("predex_last_synced_block");
+      let lastSyncedBlock = stored ? Number(stored) : latestBlock;
+
+      // 👇 re-scan the previous 5 blocks
+      const fromBlock = Math.max(lastSyncedBlock - 5, 0);
+
+      // store latest block
+      localStorage.setItem(
+        "predex_last_synced_block",
+        String(latestBlock)
+      );
+
       // snapshot current wagers at call-time
       const current = wagers;
 
@@ -341,18 +362,6 @@ export function useWagers() {
     }
   }
 
-  /* =========================================================
-     AUTO SYNC (polling)
-     Chain-driven (not time-driven lifecycle). Keeps UI fresh.
-  ========================================================= */
-  useEffect(() => {
-    const t = setInterval(() => {
-      void syncFromChain();
-    }, 8000);
-
-    return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wagers.length]);
 
   /* =========================================================
      CREATE OPEN BET (UNCHANGED / OFF-CHAIN ENGINE)
@@ -474,19 +483,19 @@ export function useWagers() {
   ========================================================= */
   async function acceptP2POnChain(params: {
     escrowAddress: string;
-    stakePerParticipantWei: string; // must be correct stake
+    stakePerParticipantWei: string;
   }) {
     const escrow = await getEscrow(params.escrowAddress);
 
-    // Safety: do not spam reverts
     const stateBn = await escrow.state();
     if (Number(stateBn) !== 0) return;
 
-    const tx = await escrow.deposit({
-      value: BigInt(params.stakePerParticipantWei),
-    });
+    await runTransaction(
+      escrow.deposit({
+        value: BigInt(params.stakePerParticipantWei),
+      })
+    );
 
-    await tx.wait();
     await syncFromChain();
   }
 

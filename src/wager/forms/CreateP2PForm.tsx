@@ -40,12 +40,16 @@ export default function CreateP2PForm({
     );
 
     const wager = {
-      style: "P2P" as const,
-      description,
-      deadline: unixDeadline,
-      stakePerParticipant: stake,
-      sideB: opponent.trim(), // partyA is msg.sender in contract
-    };
+  style: "P2P" as const,
+
+  // UI fields
+  description: description.trim(),
+
+  // chain fields
+  deadline: unixDeadline,
+  stakePerParticipant: stake,
+  sideB: opponent.trim(),
+};
 
     onSubmit(wager);
   }

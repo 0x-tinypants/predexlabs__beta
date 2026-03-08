@@ -3,6 +3,8 @@ import type { DeclaredDirection } from "../wager/types";
 import { getOppositeDirection } from "../state/useWagers";
 import TileShell from "../ui/tile/TileShell";
 import "./openBetTile.css";
+import WalletLink from "../components/profile/WalletLink";
+
 
 type Props = {
   wager: Wager;
@@ -48,14 +50,14 @@ export default function OpenBetTile({
           : "OPEN";
 
   // ✅ Prevent creator from joining their own wager
- // ✅ Prevent creator from joining their own wager
-const isCreator =
-  currentUserId === wager.creatorId;
+  // ✅ Prevent creator from joining their own wager
+  const isCreator =
+    currentUserId === wager.creatorId;
 
-const canJoin =
-  stage === "OPEN" &&
-  totals.remaining > 0 &&
-  !isCreator;
+  const canJoin =
+    stage === "OPEN" &&
+    totals.remaining > 0 &&
+    !isCreator;
 
   function handleSideSelect(
     e: React.MouseEvent,
@@ -83,8 +85,9 @@ const canJoin =
         <div className="open-meta">
           <div className="open-meta-left">
             <div className="open-circle meta-circle" />
-            <span>by {creatorUsername}</span>
-          </div>
+            <span>
+              by <WalletLink wallet={wager.creatorId} />
+            </span>          </div>
 
           <span className="open-meta-time">
             ⏱{" "}

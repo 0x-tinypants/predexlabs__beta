@@ -7,39 +7,76 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
-  User,
+  setPersistence,
+  browserSessionPersistence,
+  User
 } from "firebase/auth";
 
 import { auth } from "./firebase";
 
-// Email Register
+/* =========================================================
+   SESSION CONFIG
+   Ensures login only lasts for the browser session
+========================================================= */
+
+const applySessionPersistence = async () => {
+  await setPersistence(auth, browserSessionPersistence);
+};
+
+/* =========================================================
+   EMAIL REGISTER
+========================================================= */
+
 export const registerWithEmail = async (
   email: string,
   password: string
 ) => {
+
+  await applySessionPersistence();
+
   return createUserWithEmailAndPassword(auth, email, password);
 };
 
-// Email Login
+/* =========================================================
+   EMAIL LOGIN
+========================================================= */
+
 export const loginWithEmail = async (
   email: string,
   password: string
 ) => {
+
+  await applySessionPersistence();
+
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-// Google Login
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
 export const loginWithGoogle = async () => {
+
+  await applySessionPersistence();
+
   const provider = new GoogleAuthProvider();
+
   return signInWithPopup(auth, provider);
 };
 
-// Logout
+/* =========================================================
+   LOGOUT
+========================================================= */
+
 export const logoutUser = async () => {
   return signOut(auth);
 };
 
-// Auth Listener
+/* =========================================================
+   AUTH STATE LISTENER
+   Used by useAuth() hook
+========================================================= */
+
 export const onAuthChange = (
   callback: (user: User | null) => void
 ) => {

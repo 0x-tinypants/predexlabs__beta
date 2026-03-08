@@ -2,6 +2,12 @@ import { ethers } from "ethers";
 
 export const SEPOLIA_CHAIN_ID = 11155111;
 
+const SESSION_KEY = "predex_wallet";
+
+/* =========================================================
+   CONNECT WALLET
+========================================================= */
+
 export async function connectWallet() {
   if (!window.ethereum) {
     throw new Error("MetaMask not installed");
@@ -27,10 +33,29 @@ export async function connectWallet() {
     });
   }
 
+  /* Save wallet session */
+  localStorage.setItem(SESSION_KEY, address.toLowerCase());
+
   return {
     provider,
     signer,
     address,
     chainId,
   };
+}
+
+/* =========================================================
+   RESTORE WALLET SESSION
+========================================================= */
+
+export function getSavedWallet() {
+  return localStorage.getItem(SESSION_KEY);
+}
+
+/* =========================================================
+   CLEAR WALLET SESSION
+========================================================= */
+
+export function disconnectWallet() {
+  localStorage.removeItem(SESSION_KEY);
 }

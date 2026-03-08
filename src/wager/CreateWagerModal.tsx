@@ -18,6 +18,8 @@ export default function CreateWagerModal({
   const [selectedStyle, setSelectedStyle] =
     useState<WagerStyle | null>(null);
 
+  const [showComingSoon, setShowComingSoon] = useState<"open" | "market" | null>(null);
+
   const [demoSeed, setDemoSeed] = useState<any | null>(null);
 
   function loadDemoContract() {
@@ -83,7 +85,7 @@ export default function CreateWagerModal({
               <div className="option-grid">
                 <button
                   className="option-card"
-                  onClick={() => setSelectedStyle("open")}
+                  onClick={() => setShowComingSoon("open")}
                 >
                   Open Bet
                 </button>
@@ -97,7 +99,7 @@ export default function CreateWagerModal({
 
                 <button
                   className="option-card"
-                  onClick={() => setSelectedStyle("market")}
+                  onClick={() => setShowComingSoon("market")}
                 >
                   Market
                 </button>
@@ -105,7 +107,6 @@ export default function CreateWagerModal({
             </div>
           </div>
         )}
-
         {/* ================= STEP 2 ================= */}
         {selectedStyle === "open" && (
           <div className="modal-body">
@@ -134,6 +135,36 @@ export default function CreateWagerModal({
               onSubmit={onSubmit}
               onCancel={handleBackToSelection}
             />
+          </div>
+        )}
+
+        {/* ===== COMING SOON MODAL ===== */}
+        {showComingSoon && (
+          <div className="coming-soon-overlay">
+            <div className="coming-soon-modal">
+              <h3>Coming Soon</h3>
+
+              {showComingSoon === "open" && (
+                <p>
+                  Open Bets will allow you to expose a wager to the entire
+                  network. Any player will be able to accept your wager.
+                </p>
+              )}
+
+              {showComingSoon === "market" && (
+                <p>
+                  Markets will allow multiple participants to join a shared
+                  betting pool with dynamic odds and payouts.
+                </p>
+              )}
+
+              <button
+                className="coming-soon-close"
+                onClick={() => setShowComingSoon(null)}
+              >
+                Got It
+              </button>
+            </div>
           </div>
         )}
       </div>

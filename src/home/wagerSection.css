@@ -4,7 +4,10 @@
 
 .wager-section {
   margin-top: 28px;
+  width: 100%;
 }
+
+/* Section Title */
 
 .wager-section-title {
   margin-bottom: 18px;
@@ -14,13 +17,29 @@
   letter-spacing: 0.02em;
 }
 
+
 /* =========================================================
    Wager Grid — Marketplace Layout
 ========================================================= */
+
 .wager-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+
+  /* Desktop layout */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
   gap: 24px;
+
+  width: 100%;
 }
 
 
+/* =========================================================
+   Tile Safety Rules
+   Prevent overflow issues
+========================================================= */
+
+.wager-grid > * {
+  width: 100%;
+  min-width: 0;
+}

@@ -4,6 +4,8 @@
 
 /* ❗ NO layout properties here */
 .p2p-tile {
+  width: 100%;
+  min-width: 0;
 
   /* Duel Background */
   background:
@@ -127,12 +129,29 @@
   height: 60px;
   border-radius: 50%;
 
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(89, 228, 84, 0.35);
 
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.15),
-    0 0 8px rgba(255, 200, 90, 0.08);
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    0 0 10px rgba(88,221,83,0.35),
+    0 0 22px rgba(88,221,83,0.12);
+}
+
+.p2p-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.p2p-tile:hover .p2p-avatar {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    0 0 16px rgba(88,221,83,0.55),
+    0 0 34px rgba(88,221,83,0.22);
 }
 
 .p2p-username {
@@ -157,7 +176,30 @@
   opacity: 0.6;
 }
 
+/* =========================================
+   DESCRIPTION PREVIEW
+   ========================================= */
 
+.p2p-description {
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+
+  color: rgba(255, 255, 255, 0.65);
+
+  margin-top: 8px;
+  margin-bottom: 6px;
+
+  max-width: 88%;
+  margin-left: auto;
+  margin-right: auto;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 /* =========================================
    META ROW
    ========================================= */
@@ -207,7 +249,8 @@
 .p2p-actions {
   display: flex;
   gap: 10px;
-  margin-top: 14px;    /* was 18px — slightly too airy */
+  margin-top: 14px;
+  /* was 18px — slightly too airy */
 }
 
 /* =========================================
@@ -218,7 +261,8 @@
 .p2p-btn {
   flex: 1;
 
-  display: flex;                 /* 🔥 missing before */
+  display: flex;
+  /* 🔥 missing before */
   align-items: center;
   justify-content: center;
 
@@ -234,16 +278,15 @@
   cursor: pointer;
   transition: all 0.18s ease;
 
-  white-space: nowrap;           /* 🔥 prevents breaking */
+  white-space: nowrap;
+  /* 🔥 prevents breaking */
 }
 
 /* Primary */
 .p2p-btn-primary {
-  background: linear-gradient(
-    180deg,
-    rgba(88, 221, 83, 0.16),
-    rgba(88, 221, 83, 0.06)
-  );
+  background: linear-gradient(180deg,
+      rgba(88, 221, 83, 0.16),
+      rgba(88, 221, 83, 0.06));
 
   border: 1px solid rgba(88, 221, 83, 0.45);
   color: #58dd53;
@@ -277,11 +320,9 @@
   padding: 6px 10px;
   gap: 3px;
 
-  background: linear-gradient(
-    180deg,
-    rgba(88, 221, 83, 0.12),
-    rgba(88, 221, 83, 0.04)
-  );
+  background: linear-gradient(180deg,
+      rgba(88, 221, 83, 0.12),
+      rgba(88, 221, 83, 0.04));
 
   border: 1px solid rgba(88, 221, 83, 0.35);
 }
@@ -302,5 +343,6 @@
   font-weight: 600;
   letter-spacing: 0.3px;
   line-height: 1.1;
-  white-space: nowrap;           /* 🔥 stops 3-line break */
+  white-space: nowrap;
+  /* 🔥 stops 3-line break */
 }

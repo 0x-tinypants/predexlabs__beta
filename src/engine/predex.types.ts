@@ -165,6 +165,9 @@ export interface ChainP2PWager {
   style: "P2P";
   creatorId: string;
 
+  // UI metadata (not part of chain authority)
+  description?: string;
+
   partyA: string;
   partyB: string;
 

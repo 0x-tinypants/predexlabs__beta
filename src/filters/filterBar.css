@@ -1,28 +1,29 @@
 /* =========================================================
    FILTER RAIL — OUTER SHELL
-   Controls: centering + vertical spacing in page flow
-   Mirrors header shell behavior
+   Centers rail and controls vertical spacing
 ========================================================= */
 
 .filter-rail-shell {
   margin: 0 auto 28px;
   display: flex;
   justify-content: center;
+  width: 100%;
 }
 
 
 /* =========================================================
    FILTER RAIL — CORE BAR
-   Controls: glass rail + glow edges
+   Glass rail with glow edges
 ========================================================= */
 
 .filter-rail {
   width: 100%;
-  max-width: 900px; /* ~70% desktop width */
+  max-width: 900px;
   height: 44px;
 
   display: grid;
   grid-template-columns: auto 1fr auto;
+
   align-items: center;
 
   padding: 0 18px;
@@ -39,8 +40,7 @@
 
 
 /* =========================================================
-   FILTER RAIL — TOP & BOTTOM GLOW EDGES
-   Rail feel (not a pill, not a card)
+   GLOW EDGES
 ========================================================= */
 
 .filter-rail::before,
@@ -71,44 +71,86 @@
 
 
 /* =========================================================
-   FILTER RAIL — ZONES
+   ZONES
 ========================================================= */
 
-.filter-left,
-.filter-center,
-.filter-right {
+.filter-date,
+.filter-brand,
+.filter-actions {
   display: flex;
   align-items: center;
 }
 
-/* Left: date */
-.filter-left {
+
+/* Left — Date */
+
+.filter-date {
   font-size: 13px;
   opacity: 0.85;
 }
 
-/* Center: slogan */
-.filter-center {
+
+/* Center — PreDEX label */
+
+.filter-brand {
   justify-content: center;
-  text-align: center;
-}
-
-.filter-slogan {
   font-size: 13px;
-  font-weight: 500;
-  opacity: 0.75;
-  white-space: nowrap;
+  font-weight: 600;
+  letter-spacing: 1px;
+  opacity: 0.8;
 }
 
-/* Right: filters button */
-.filter-right {
+
+/* Right — Buttons */
+
+.filter-actions {
   justify-content: flex-end;
+  gap: 10px;
 }
 
 
 /* =========================================================
-   FILTER BUTTON — GHOST VARIANT
-   Same behavior family as Friends tile button
+   CREATE BUTTON — HOLLOW STYLE
+   Fills on hover
+========================================================= */
+
+.create-button {
+  padding: 7px 16px;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  border-radius: 999px;
+
+  border: 1px solid #dbf93a;
+  background: transparent;
+  color: #dbf93a;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.create-button:hover {
+  background: linear-gradient(90deg, #dbf93a, #58dd53);
+  color: #000;
+
+  box-shadow: 0 0 10px rgba(120,255,120,0.35);
+
+  transform: translateY(-1px);
+}
+
+.create-button:active {
+  transform: scale(0.96);
+}
+
+
+/* =========================================================
+   FILTER BUTTON — GHOST
 ========================================================= */
 
 .filter-button {
@@ -118,6 +160,7 @@
   font-weight: 500;
 
   border-radius: 10px;
+
   border: 1px solid var(--glass-border);
 
   background: transparent;
@@ -131,21 +174,6 @@
 }
 
 .filter-button:hover {
-  background: rgba(120, 255, 120, 0.18);
+  background: rgba(120,255,120,0.18);
   border-color: var(--glow-green);
-}
-
-.create-button {
-  background: linear-gradient(90deg, #dbf93a, #58dd53);
-  border: none;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-right: 10px;
-  transition: transform 0.15s ease;
-}
-
-.create-button:hover {
-  transform: scale(1.05);
 }

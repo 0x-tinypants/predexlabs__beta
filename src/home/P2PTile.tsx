@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import TileShell from "../ui/tile/TileShell";
 import type { Wager } from "../wager/types";
 import "./p2pTile.css";
+import WalletLink from "../components/profile/WalletLink";
+import { getProfile } from "../services/profile.service";
 
 type Props = {
   wager: Wager;
@@ -22,8 +24,11 @@ export default function P2PTile({
   onClaim, // 👈 add this
   onOpenDetails,
 }: Props) {
+
   const escrowAddress = wager.escrowAddress;
 
+  const [avatarA, setAvatarA] = useState<string | null>(null);
+  const [avatarB, setAvatarB] = useState<string | null>(null);
   /* -------------------------------------------------------
      FORCE RE-RENDER FOR DEADLINE PASSING
   ------------------------------------------------------- */
@@ -62,12 +67,37 @@ export default function P2PTile({
   const partyA = wager.partyA ?? "—";
   const partyB = wager.partyB ?? "—";
 
+  useEffect(() => {
+  async function loadProfiles() {
+    try {
+      const a = await getProfile(partyA);
+      const b = await getProfile(partyB);
+
+      setAvatarA(a?.identity?.avatarUrl ?? null);
+      setAvatarB(b?.identity?.avatarUrl ?? null);
+
+    } catch (err) {
+      console.warn("Profile load failed", err);
+    }
+  }
+
+  if (partyA && partyB) {
+    loadProfiles();
+  }
+}, [partyA, partyB]);
+
+  const description =
+    wager.definition?.description &&
+      wager.definition.description !== "Peer-to-Peer Wager"
+      ? wager.definition.description
+      : "";
+
   const shortAddress = (addr?: string) => {
     if (!addr) return "—";
     return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
   };
 
-  const viewer = viewerAddress?.toLowerCase?.() ?? "";
+  const viewer = viewerAddress?.toLowerCase() ?? "";
 
   /* -------------------------------------------------------
      STAKE
@@ -167,23 +197,35 @@ export default function P2PTile({
       <div className="p2p-content">
 
         <div className="p2p-main">
+
           <div className="p2p-vs-row">
             <div className="p2p-player">
-              <div className="p2p-avatar" />
+              <div className="p2p-avatar">
+                {avatarA && <img src={avatarA} />}
+              </div>
               <div className="p2p-username">
-                {shortAddress(partyA)}
+                <WalletLink wallet={partyA} />
               </div>
             </div>
 
             <div className="p2p-vs">VS</div>
 
             <div className="p2p-player">
-              <div className="p2p-avatar" />
+              <div className="p2p-avatar">
+                {avatarB && <img src={avatarB} />}
+              </div>
               <div className="p2p-username">
-                {shortAddress(partyB)}
+                <WalletLink wallet={partyB} />
               </div>
             </div>
           </div>
+
+          {/* Description preview */}
+          {description && (
+            <div className="p2p-description">
+              {description}
+            </div>
+          )}
 
           <div className="p2p-meta">
             <span className="p2p-meta-stake">
@@ -196,8 +238,8 @@ export default function P2PTile({
               Closes {deadlineDateLabel} · {deadlineLabel}
             </span>
           </div>
-        </div>
 
+        </div>
         {(canAccept || canDecline || canSelectWinner || isClaimable) && (
           <div className="p2p-actions">
 
@@ -239,8 +281,7 @@ export default function P2PTile({
                 >
                   <span className="p2p-btn-label">Select Winner</span>
                   <span className="p2p-btn-wallet">
-                    {shortAddress(partyA)}
-                  </span>
+                    <WalletLink wallet={partyA} />                  </span>
                 </button>
 
                 <button
@@ -253,8 +294,7 @@ export default function P2PTile({
                 >
                   <span className="p2p-btn-label">Select Winner</span>
                   <span className="p2p-btn-wallet">
-                    {shortAddress(partyB)}
-                  </span>
+                    <WalletLink wallet={partyB} />                  </span>
                 </button>
               </>
             )}
@@ -265,6 +305,10 @@ export default function P2PTile({
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!escrowAddress) return;
+
+                  // 🔒 prevent double finalize clicks
+                  e.currentTarget.disabled = true;
+
                   onClaim?.(escrowAddress);
                 }}
               >

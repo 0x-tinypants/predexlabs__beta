@@ -4,6 +4,9 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
+  query,
+  where,
+  getDocs
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
@@ -11,7 +14,12 @@ const wagersCollection = collection(db, "wagers");
 
 export const createWagerRecord = async (data: any) => {
   return addDoc(wagersCollection, {
-    ...data,
+    escrowAddress: data.escrowAddress.toLowerCase(),
+    description: data.description,
+    partyA: data.partyA,
+    partyB: data.partyB,
+    stake: data.stake,
+    deadline: data.deadline,
     createdAt: serverTimestamp(),
     status: "open",
   });
@@ -27,4 +35,19 @@ export const updateWagerStatus = async (
     status,
     updatedAt: serverTimestamp(),
   });
+};
+
+export const getWagerMetadataByEscrow = async (
+  escrowAddress: string
+) => {
+  const q = query(
+    wagersCollection,
+    where("escrowAddress", "==", escrowAddress.toLowerCase())
+  );
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) return null;
+
+  return snap.docs[0].data();
 };

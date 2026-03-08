@@ -77,7 +77,7 @@ export function mapPreDEXWagerToUI(params: {
 
     if (!isParticipant) return null;
 
-const chainState = engineWager.chainState;
+    const chainState = engineWager.chainState;
 
     return {
       id: engineWager.id,
@@ -97,11 +97,11 @@ const chainState = engineWager.chainState;
       },
 
       definition: {
-        description: "Peer-to-Peer Wager",
-        line: undefined,
-        deadline: engineWager.deadline,
-        declaredDirection: "sideA",
-      },
+  description: engineWager.description || "",
+  line: undefined,
+  deadline: engineWager.deadline,
+  declaredDirection: "sideA",
+},
 
       participants: {
         mode: "p2p",

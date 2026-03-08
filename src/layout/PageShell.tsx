@@ -1,57 +1,94 @@
-import { useState, ReactNode } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import Header from "./Header";
-import { connectWallet } from "../blockchain/wallet";
+import { connectWallet, getSavedWallet } from "../blockchain/wallet";
+import { ensureProfile } from "../services/profile.service";
 
 type PageShellProps = {
   children: ReactNode;
-  firebaseUserId: string | null;
-  onLogin: () => void;
-  onLogout: () => void;
+  walletAddress: string | null;
+  onConnect: () => void;
   fullWidth?: boolean;
 };
 
 export default function PageShell({
   children,
-  firebaseUserId,
-  onLogin,
-  onLogout,
+  walletAddress: externalWallet,
+  onConnect: externalConnect,
   fullWidth = false,
 }: PageShellProps) {
+
   const [walletAddress, setWalletAddress] =
-    useState<string | null>(null);
+    useState<string | null>(externalWallet ?? null);
+
+  useEffect(() => {
+    const restore = async () => {
+
+      const savedWallet = getSavedWallet();
+
+      if (!savedWallet) return;
+
+      console.log("SESSION RESTORED:", savedWallet);
+
+      setWalletAddress(savedWallet);
+
+      await ensureProfile(savedWallet);
+
+    };
+
+    restore();
+
+  }, []);
 
   const handleConnect = async () => {
-  console.log("CLICK: Connect Wallet button");
 
-  try {
-    const wallet = await connectWallet();
+    console.log("CLICK: Connect Wallet");
 
-    setWalletAddress(wallet.address);
-  } catch (err: any) {
-    console.error("ERROR CONNECTING WALLET:", err);
-    alert(err.message);
-  }
-};
+    try {
+
+      const wallet = await connectWallet();
+
+      const address = wallet.address.toLowerCase();
+
+      setWalletAddress(address);
+
+      await ensureProfile(address);
+
+      if (externalConnect) {
+        await externalConnect();
+      }
+
+    } catch (err: any) {
+
+      console.error("WALLET CONNECT FAILED:", err);
+
+      alert(err.message);
+
+    }
+
+  };
 
   return (
     <div className="app-shell">
+
       <Header
         walletAddress={walletAddress}
         onConnect={handleConnect}
-        firebaseUserId={firebaseUserId}
-        onLogin={onLogin}
-        onLogout={onLogout}
       />
 
       <main className="app-content">
+
         <div
           className={`content-rail ${
             fullWidth ? "content-rail--full" : ""
           }`}
         >
+
           {children}
+
         </div>
+
       </main>
+
     </div>
   );
 }

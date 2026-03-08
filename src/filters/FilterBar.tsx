@@ -19,15 +19,12 @@ export default function FilterBar({
   return (
     <div className="filter-rail-shell">
       <div className="filter-rail">
-        <div className="filter-left">{today}</div>
 
-        <div className="filter-center">
-          <span className="filter-slogan">
-            Remove the sportsbooks. Predict your future.
-          </span>
-        </div>
+        <div className="filter-date">{today}</div>
 
-        <div className="filter-right">
+        <div className="filter-brand">PreDEX</div>
+
+        <div className="filter-actions">
           <button
             className="create-button"
             onClick={onCreate}
@@ -42,6 +39,7 @@ export default function FilterBar({
             Filters
           </button>
         </div>
+
       </div>
     </div>
   );

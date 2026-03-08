@@ -241,3 +241,70 @@
 .option-card:active {
   transform: scale(0.98);
 }
+
+
+.coming-soon-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.coming-soon-modal {
+  width: 420px;
+  padding: 36px 34px;
+  border-radius: 14px;
+
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(80, 255, 120, 0.25);
+
+  box-shadow:
+    0 0 30px rgba(0, 255, 120, 0.08),
+    inset 0 0 12px rgba(255, 255, 255, 0.02);
+
+  text-align: center;
+}
+
+.coming-soon-modal h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #e9fbe7;
+}
+
+.coming-soon-modal p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 26px;
+}
+
+.coming-soon-close {
+  padding: 10px 20px;
+  border-radius: 8px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(80,255,120,0.18),
+    rgba(80,255,120,0.08)
+  );
+
+  border: 1px solid rgba(80,255,120,0.4);
+  color: #d6ffd9;
+
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+
+  transition: all 0.15s ease;
+}
+
+.coming-soon-close:hover {
+  background: rgba(80,255,120,0.22);
+  border-color: rgba(80,255,120,0.7);
+  box-shadow: 0 0 12px rgba(80,255,120,0.25);
+}

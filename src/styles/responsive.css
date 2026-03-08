@@ -1,0 +1,69 @@
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 1024px) {
+
+  .wager-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .content-rail {
+    padding: 0 20px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+
+  .tile-shell {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .wager-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+
+  }
+
+  .header-rail {
+    padding: 0 14px;
+  }
+
+  .filter-rail {
+    height: auto;
+
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+
+    row-gap: 8px;
+
+    padding: 12px 14px;
+  }
+
+  .filter-date {
+    justify-content: center;
+  }
+
+  .filter-brand {
+    justify-content: center;
+  }
+
+  .filter-actions {
+    justify-content: space-between;
+  }
+
+  .create-button,
+  .filter-button {
+    flex: 1;
+    height: 40px;
+  }
+
+}
+
