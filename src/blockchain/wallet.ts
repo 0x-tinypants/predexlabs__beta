@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { initWeb3Auth } from "../web3/web3auth.service";
 
 export const SEPOLIA_CHAIN_ID = 11155111;
 
@@ -50,6 +51,38 @@ export async function connectWallet() {
 
 export function getSavedWallet() {
   return localStorage.getItem(SESSION_KEY);
+}
+
+
+/* =========================================================
+   RESTORE WEB3AUTH SESSION
+========================================================= */
+
+export async function restoreWeb3AuthSession() {
+
+  const web3auth = await initWeb3Auth();
+
+  if (!web3auth.connected) return null;
+
+  const provider = web3auth.provider;
+
+  if (!provider) return null;
+
+  const accounts = await provider.request({
+    method: "eth_accounts",
+  }) as string[];
+
+  const address = accounts[0]?.toLowerCase();
+
+  if (!address) return null;
+
+  /* Save session for PreDEX */
+  localStorage.setItem(SESSION_KEY, address);
+
+  return {
+    provider,
+    address,
+  };
 }
 
 /* =========================================================

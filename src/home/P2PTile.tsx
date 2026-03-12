@@ -29,16 +29,7 @@ export default function P2PTile({
 
   const [avatarA, setAvatarA] = useState<string | null>(null);
   const [avatarB, setAvatarB] = useState<string | null>(null);
-  /* -------------------------------------------------------
-     FORCE RE-RENDER FOR DEADLINE PASSING
-  ------------------------------------------------------- */
-  const [, forceTick] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => {
-      forceTick((x) => x + 1);
-    }, 1000);
-    return () => clearInterval(t);
-  }, []);
+ 
 
   /* -------------------------------------------------------
      CHAIN STATE

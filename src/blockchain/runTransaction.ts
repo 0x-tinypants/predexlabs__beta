@@ -13,7 +13,6 @@ export async function runTransaction(
 
   try {
 
-    // Stage 1 — waiting for wallet confirmation
     window.dispatchEvent(
       new CustomEvent("predex_tx_start", {
         detail: { message: "Confirm transaction in your wallet..." }
@@ -22,18 +21,18 @@ export async function runTransaction(
 
     const tx = await txPromise;
 
-    // Stage 2 — transaction submitted
     window.dispatchEvent(
       new CustomEvent("predex_tx_start", {
         detail: { message: "Transaction submitted — waiting for confirmation..." }
       })
     );
 
-    const receipt = await tx.wait();
+    // 🔥 Confirmation happens in background
+    tx.wait().then(() => {
+      window.dispatchEvent(new Event("predex_tx_end"));
+    });
 
-    window.dispatchEvent(new Event("predex_tx_end"));
-
-    return receipt;
+    return tx;
 
   } catch (err) {
 

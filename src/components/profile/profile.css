@@ -549,6 +549,26 @@
   opacity: .6;
 }
 
+.profile-activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.activity-toggle button {
+  background: none;
+  border: none;
+  color: #aaa;
+  margin-left: 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.activity-toggle button.active {
+  color: #58dd53;
+  font-weight: 600;
+}
+
 /* =========================================================
    BADGES
 ========================================================= */

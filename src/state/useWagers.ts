@@ -108,6 +108,7 @@ type AppWager = PreDEXWager & Partial<ChainP2PFields>;
 
 const LS_MARKETS = "predex_markets";
 const LS_P2P_INDEX = "predex_p2p_index_v1";
+const escrowCache = new Map<string, any>();
 
 /* =========================================================
    UTIL: safe JSON parse
@@ -260,6 +261,8 @@ export function useWagers() {
 
   async function syncFromChain() {
 
+    console.time("syncFromChain_total");
+
     if (syncingRef.current) return;
     syncingRef.current = true;
 
@@ -291,11 +294,22 @@ export function useWagers() {
 
       const updated = await Promise.all(
         current.map(async (w) => {
+
+          if (w.style !== "P2P" || !w.escrowAddress) {
+            return w;
+          }
+
+          console.time(`escrow_${w.escrowAddress}`);
+
           if (w.style !== "P2P" || !w.escrowAddress) return w;
 
           try {
-            const escrow = await getEscrow(w.escrowAddress);
+            let escrow = escrowCache.get(w.escrowAddress);
 
+            if (!escrow) {
+              escrow = await getEscrow(w.escrowAddress);
+              escrowCache.set(w.escrowAddress, escrow);
+            }
             // Required
             const stateBn = await escrow.state();
             const chainState = Number(stateBn);
@@ -338,6 +352,8 @@ export function useWagers() {
               // ignore (ABI may not expose)
             }
 
+            console.timeEnd(`escrow_${w.escrowAddress}`);
+
             return {
               ...w,
               chainState,
@@ -357,6 +373,9 @@ export function useWagers() {
       );
 
       setWagers(updated);
+
+      console.timeEnd("syncFromChain_total");
+
     } finally {
       syncingRef.current = false;
     }

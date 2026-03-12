@@ -1,7 +1,7 @@
 // src/home/WagerSection.tsx
 
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import WagerTile from "./WagerTile";
 import MarketTile from "./MarketTile";
@@ -48,77 +48,59 @@ export default function WagerSection({
   onSelectWinnerP2P?: (escrowAddress: string, winner: string) => void;
   onClaimP2P?: (escrowAddress: string) => void;
 }) {
-
   const navigate = useNavigate();
 
   /*
   =====================================
-  MODAL STATE (NEW)
+  MODAL STATE
   =====================================
   */
+
   const [selectedWager, setSelectedWager] = useState<Wager | null>(null);
 
   /*
   =====================================
-  DEBUG: Inspect wager structure
+  FILTER EXPIRED P2P WAGERS
   =====================================
   */
-  wagers.forEach((item) => {
-    if (item.type === "WAGER") {
-    }
-  });
 
-  // ============================================
-  // REMOVE EXPIRED UNACCEPTED P2P WAGERS
-  // ============================================
+  const filteredWagers = useMemo(() => {
+    const EXPIRATION_BUFFER_MS = 2 * 60 * 1000;
 
-  const EXPIRATION_BUFFER_MS = 2 * 60 * 1000;
+    return wagers.filter((item) => {
+      if (item.type === "MARKET") return true;
 
-  const filteredWagers = wagers.filter((item) => {
+      const wager = item.data as any;
 
-    if (item.type === "MARKET") return true;
+      const deadline = wager?.definition?.deadline;
+      if (!deadline) return true;
 
-    const wager = item.data as any;
+      const deadlineMs = new Date(deadline).getTime();
+      const now = Date.now();
 
-    const deadline = wager.definition?.deadline;
-    if (!deadline) return true;
+      const isExpired = now > deadlineMs + EXPIRATION_BUFFER_MS;
+      const isStillOpen = wager?.status === "open";
 
-    const deadlineMs = new Date(deadline).getTime();
-    const now = Date.now();
+      if (isStillOpen && isExpired) {
+        return false;
+      }
 
-    const isExpired = now > deadlineMs + EXPIRATION_BUFFER_MS;
-    const isStillOpen = wager.status === "open";
+      return true;
+    });
+  }, [wagers]);
 
-    if (isStillOpen && isExpired) {
-      return false;
-    }
-
-    return true;
-  });
-
+ 
   /*
-=====================================
-LOADING SKELETON
-=====================================
-*/
-
-if (!wagers || wagers.length === 0) {
-  return (
-    <section className="wager-section">
-      <div className="wager-grid">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="wager-skeleton" />
-        ))}
-      </div>
-    </section>
-  );
-}
-
+  =====================================
+  RENDER
+  =====================================
+  */
 
   return (
     <section className="wager-section">
 
       <div className="wager-grid">
+
         {filteredWagers.map((item) => {
 
           /*
@@ -126,6 +108,7 @@ if (!wagers || wagers.length === 0) {
           MARKET TILE
           =============================
           */
+
           if (item.type === "MARKET") {
             return (
               <MarketTile
@@ -141,25 +124,28 @@ if (!wagers || wagers.length === 0) {
           WAGER TILE
           =============================
           */
+
           return (
             <WagerTile
               key={`wager-${item.data.id}`}
               wager={item.data}
               currentUserId={currentUserId}
+
               onQuickBet={onQuickBet}
               onAccept={onAcceptP2P}
               onDecline={onDeclineP2P}
               onSelectWinner={onSelectWinnerP2P}
               onClaim={onClaimP2P}
 
-              // NEW → open contract modal
               onOpenDetails={() => setSelectedWager(item.data)}
             />
           );
         })}
+
       </div>
 
-      {/* NEW → ESCROW DETAILS MODAL */}
+      {/* ESCROW DETAILS MODAL */}
+
       {selectedWager && (
         <EscrowDetailModal
           wager={selectedWager}

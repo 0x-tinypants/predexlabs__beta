@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
-import { connectWallet, getSavedWallet, disconnectWallet } from "../blockchain/wallet";
-import { ensureProfile, getProfile } from "../services/profile.service";
+import {
+  connectWallet,
+  getSavedWallet,
+  disconnectWallet
+} from "../blockchain/wallet";
+
+import {
+  ensureProfile,
+  getProfile
+} from "../services/profile.service";
+
+import {
+  loginWithWeb3Auth,
+  restoreWeb3AuthSession
+} from "../web3/web3auth.service";
 
 export function useWallet() {
 
@@ -8,31 +21,57 @@ export function useWallet() {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /* Restore saved wallet session */
+  /* -------------------------------- */
+  /* Restore wallet session */
+  /* -------------------------------- */
 
   useEffect(() => {
 
     async function restore() {
 
-      const saved = getSavedWallet();
-
-      if (!saved) {
-        setLoading(false);
-        return;
-      }
-
       try {
 
-        setWallet(saved);
+        /* 1️⃣ Try Web3Auth session */
 
-        await ensureProfile(saved);
+        const web3Session = await restoreWeb3AuthSession();
 
-        const profileData = await getProfile(saved);
+        if (web3Session) {
+
+          const walletAddress = web3Session.address.toLowerCase();
+
+          setWallet(walletAddress);
+
+          await ensureProfile(walletAddress);
+
+          const profileData = await getProfile(walletAddress);
+
+          setProfile(profileData);
+
+          setLoading(false);
+          return;
+        }
+
+        /* 2️⃣ Fallback to MetaMask */
+
+        const saved = getSavedWallet();
+
+        if (!saved) {
+          setLoading(false);
+          return;
+        }
+
+        const walletAddress = saved.toLowerCase();
+
+        setWallet(walletAddress);
+
+        await ensureProfile(walletAddress);
+
+        const profileData = await getProfile(walletAddress);
 
         setProfile(profileData);
 
       } catch (err) {
-        console.error("Wallet restore failed", err);
+        console.error("Wallet restore failed:", err);
       }
 
       setLoading(false);
@@ -42,24 +81,48 @@ export function useWallet() {
 
   }, []);
 
+  /* -------------------------------- */
   /* Connect wallet */
+  /* -------------------------------- */
 
-  async function connect() {
+  async function connect(providerType: "metamask" | "web3auth" = "metamask") {
 
-    const result = await connectWallet();
+    setLoading(true);
 
-    const walletAddress = result.address.toLowerCase();
+    try {
 
-    setWallet(walletAddress);
+      let walletAddress: string;
 
-    await ensureProfile(walletAddress);
+      if (providerType === "metamask") {
 
-    const profileData = await getProfile(walletAddress);
+        const result = await connectWallet();
+        walletAddress = result.address.toLowerCase();
 
-    setProfile(profileData);
+      } else {
+
+        const result = await loginWithWeb3Auth();
+        walletAddress = result.address.toLowerCase();
+
+      }
+
+      setWallet(walletAddress);
+
+      await ensureProfile(walletAddress);
+
+      const profileData = await getProfile(walletAddress);
+
+      setProfile(profileData);
+
+    } catch (err) {
+      console.error("Wallet connection failed:", err);
+    }
+
+    setLoading(false);
   }
 
+  /* -------------------------------- */
   /* Disconnect */
+  /* -------------------------------- */
 
   function disconnect() {
     disconnectWallet();
@@ -73,6 +136,6 @@ export function useWallet() {
     loading,
     connect,
     disconnect,
-    connected: !!wallet,
+    connected: !!wallet
   };
 }

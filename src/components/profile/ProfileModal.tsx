@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import "./profile.css";
 import ProfileViewer from "./ProfileViewer";
+import { useEngineState } from "../../state/useEngineState";
 
 type ProfileModalProps = {
   wallet: string | null;
@@ -13,6 +14,8 @@ export default function ProfileModal({
   isOpen,
   onClose,
 }: ProfileModalProps) {
+
+  const { engineWagers } = useEngineState();
 
   /* =========================================
      Close on ESC
@@ -63,29 +66,29 @@ export default function ProfileModal({
   ========================================= */
 
   return (
-  <div
-    className="profile-drawer-overlay"
-    onClick={(e) => {
-      if (e.target === e.currentTarget) {
-        onClose();
-      }
-    }}
-  >
     <div
-      className="profile-drawer"
-      onClick={(e) => e.stopPropagation()}
+      className="profile-drawer-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
     >
-      <button
-        className="profile-drawer-close"
-        onClick={onClose}
+      <div
+        className="profile-drawer"
+        onClick={(e) => e.stopPropagation()}
       >
-        ✕
-      </button>
+        <button
+          className="profile-drawer-close"
+          onClick={onClose}
+        >
+          ✕
+        </button>
 
-      <div className="profile-drawer-body">
-        <ProfileViewer wallet={wallet} />
+        <div className="profile-drawer-body">
+          <ProfileViewer wallet={wallet} wagers={engineWagers} />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getSavedWallet } from "../../blockchain/wallet";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import { useWagers } from "../../state/useWagers";
 import type { Profile } from "../../types/profile.types";
 import { updateProfileIdentity } from "../../services/profile.service";
 import { useRef } from "react";
@@ -10,6 +11,7 @@ import WalletLink from "./WalletLink";
 
 type Props = {
   wallet: string;
+  wagers: any[];
 };
 
 type HistoryItem = {
@@ -20,7 +22,7 @@ type HistoryItem = {
   timestamp: number;
 };
 
-export default function ProfileViewer({ wallet }: Props) {
+export default function ProfileViewer({ wallet, wagers }: Props) {
   const viewerWallet = getSavedWallet();
 
   const isOwner =
@@ -29,6 +31,9 @@ export default function ProfileViewer({ wallet }: Props) {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  /* Activity mode toggle */
+  const [activityMode, setActivityMode] = useState<"recent" | "live">("recent");
 
   const [editingUsername, setEditingUsername] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
@@ -149,6 +154,33 @@ export default function ProfileViewer({ wallet }: Props) {
   }, [wallet]);
 
   /* -------------------------------- */
+  /* Live Activity (active wagers) */
+  /* -------------------------------- */
+
+  const liveActivity = useMemo(() => {
+    const user = wallet?.toLowerCase();
+
+    return wagers
+      .filter((w: any) => {
+
+        const isParticipant =
+          w.partyA?.toLowerCase() === user ||
+          w.partyB?.toLowerCase() === user;
+
+        const unresolved =
+          w.chainState !== undefined &&
+          w.chainState < 5;
+
+        const isP2P = w.style === "P2P";
+
+        return isParticipant && unresolved && isP2P;
+
+      })
+      .slice(0, 5);
+
+  }, [wagers, wallet]);
+
+  /* -------------------------------- */
   /* Loading */
   /* -------------------------------- */
 
@@ -162,7 +194,6 @@ export default function ProfileViewer({ wallet }: Props) {
     total > 0
       ? Math.round((profile.stats.wins / total) * 100)
       : 0;
-
 
   /* -------------------------------- */
   /* Join Date */
@@ -407,7 +438,7 @@ export default function ProfileViewer({ wallet }: Props) {
         <div className="profile-stat">
           <div className="stat-label">Volume</div>
           <div className="stat-value">
-            {profile.stats.totalVolumeEth} ETH
+            {Number(profile.stats.totalVolumeEth || 0).toFixed(3)} ETH
           </div>
         </div>
 
@@ -425,8 +456,28 @@ export default function ProfileViewer({ wallet }: Props) {
 
       <div className="profile-history">
 
-        <div className="profile-section-title">
-          •• Activity
+        <div className="profile-activity-header">
+
+          <div className="profile-section-title">
+            •• Activity
+          </div>
+
+          <div className="activity-toggle">
+            <button
+              className={activityMode === "recent" ? "active" : ""}
+              onClick={() => setActivityMode("recent")}
+            >
+              Recent
+            </button>
+
+            <button
+              className={activityMode === "live" ? "active" : ""}
+              onClick={() => setActivityMode("live")}
+            >
+              Live
+            </button>
+          </div>
+
         </div>
 
         {history.length === 0 && (
@@ -435,40 +486,75 @@ export default function ProfileViewer({ wallet }: Props) {
           </div>
         )}
 
-        {history.map((h) => (
-
-          <div
-            className="history-row"
-            key={h.id}
-          >
+        {activityMode === "recent" &&
+          history.map((h) => (
 
             <div
-              className={`history-result ${h.result === "WIN"
-                ? "win"
-                : "loss"
-                }`}
+              className="history-row"
+              key={h.id}
             >
-              {h.result}
+
+              <div
+                className={`history-result ${h.result === "WIN"
+                  ? "win"
+                  : "loss"
+                  }`}
+              >
+                {h.result}
+              </div>
+
+              <div className="history-opponent">
+                vs <WalletLink wallet={h.opponent || wallet} />
+              </div>
+
+              <div className="history-stake">
+                {h.stake} ETH
+              </div>
+
+              <div className="history-time">
+                {h.timestamp
+                  ? new Date(h.timestamp)
+                    .toLocaleDateString()
+                  : "-"}
+              </div>
+
             </div>
 
-            <div className="history-opponent">
-              vs <WalletLink wallet={h.opponent || wallet} />
-            </div>
+          ))}
 
-            <div className="history-stake">
-              {h.stake} ETH
-            </div>
+        {activityMode === "live" &&
+          liveActivity.map((w: any) => {
 
-            <div className="history-time">
-              {h.timestamp
-                ? new Date(h.timestamp)
-                  .toLocaleDateString()
-                : "-"}
-            </div>
+            const opponent =
+              w.partyA?.toLowerCase() === wallet.toLowerCase()
+                ? w.partyB
+                : w.partyA;
 
-          </div>
+            return (
+              <div className="history-row" key={w.id}>
 
-        ))}
+                <div className="history-result">
+                  LIVE
+                </div>
+
+                <div className="history-opponent">
+                  vs <WalletLink wallet={opponent} />
+                </div>
+
+                <div className="history-stake">
+                  {w.stakePerParticipant
+                    ? Number(w.stakePerParticipant).toFixed(3)
+                    : "—"} ETH
+                </div>
+
+                <div className="history-time">
+                  Active
+                </div>
+
+              </div>
+            );
+
+          })}
 
       </div>
 
