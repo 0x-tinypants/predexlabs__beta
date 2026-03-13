@@ -4,49 +4,104 @@ import { ethers } from "ethers";
 import FactoryJSON from "./abis/PreDEXFactory.json";
 import EscrowJSON from "./abis/PreDEXEscrow.json";
 
-/* =========================
+/* =========================================================
    CONFIG
-========================= */
+========================================================= */
 
 export const FACTORY_ADDRESS =
-  "0x6C1458cB928660Df0ed72Ae2DD058bc156d9845E"; // Sepolia deployed factory
+  "0x6C1458cB928660Df0ed72Ae2DD058bc156d9845E";
 
-/* =========================
-   PROVIDER + SIGNER
-========================= */
+export const SEPOLIA_CHAIN_ID = 11155111n;
+
+
+/* =========================================================
+   PROVIDER RESOLUTION
+========================================================= */
+
+function resolveProviderSource() {
+
+  const web3authProvider = (window as any).web3authProvider;
+  const injectedProvider = (window as any).ethereum;
+
+  /* Web3Auth takes priority */
+  if (web3authProvider) {
+    console.log("Using Web3Auth provider");
+    return web3authProvider;
+  }
+
+  /* MetaMask or injected wallet fallback */
+  if (injectedProvider) {
+    console.log("Using injected wallet provider");
+    return injectedProvider;
+  }
+
+  throw new Error("No wallet provider found");
+}
+
+
+/* =========================================================
+   PROVIDER
+========================================================= */
 
 export function getProvider() {
-  if (!window.ethereum) {
-    throw new Error("MetaMask not detected");
-  }
 
-  return new ethers.BrowserProvider(window.ethereum);
+  const providerSource = resolveProviderSource();
+
+  return new ethers.BrowserProvider(providerSource, "any");
+
 }
+
+
+/* =========================================================
+   SIGNER
+========================================================= */
 
 export async function getSigner() {
+
   const provider = getProvider();
-  return await provider.getSigner();
+
+  const signer = await provider.getSigner();
+
+  return signer;
+
 }
+
+
+/* =========================================================
+   NETWORK CHECK
+========================================================= */
 
 export async function ensureSepolia() {
-  if (!window.ethereum || !window.ethereum.selectedAddress) {
-    // wallet not connected yet — skip check
-    return;
+
+  try {
+
+    const provider = getProvider();
+
+    const network = await provider.getNetwork();
+
+    if (network.chainId !== SEPOLIA_CHAIN_ID) {
+
+      throw new Error(
+        "Wrong network. Please switch wallet to Sepolia."
+      );
+
+    }
+
+  } catch (err) {
+
+    console.warn("Network check skipped:", err);
+
   }
 
-  const provider = getProvider();
-  const network = await provider.getNetwork();
-
-  if (network.chainId !== 11155111n) {
-    throw new Error("Please switch to Sepolia network");
-  }
 }
 
-/* =========================
-   CONTRACT GETTERS
-========================= */
+
+/* =========================================================
+   FACTORY CONTRACT
+========================================================= */
 
 export async function getFactory() {
+
   await ensureSepolia();
 
   const signer = await getSigner();
@@ -56,9 +111,16 @@ export async function getFactory() {
     FactoryJSON.abi,
     signer
   );
+
 }
 
+
+/* =========================================================
+   ESCROW CONTRACT
+========================================================= */
+
 export async function getEscrow(address: string) {
+
   await ensureSepolia();
 
   const signer = await getSigner();
@@ -68,4 +130,5 @@ export async function getEscrow(address: string) {
     EscrowJSON.abi,
     signer
   );
+
 }

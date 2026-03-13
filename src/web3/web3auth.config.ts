@@ -7,8 +7,7 @@ export const web3authConfig = {
   chainConfig: {
     chainNamespace: CHAIN_NAMESPACES.EIP155,
     chainId: "0xaa36a7", // Sepolia
-    rpcTarget: "https://rpc.sepolia.org",
-
+    rpcTarget: "https://ethereum-sepolia-rpc.publicnode.com",
     displayName: "Sepolia Testnet",
     blockExplorerUrl: "https://sepolia.etherscan.io",
 

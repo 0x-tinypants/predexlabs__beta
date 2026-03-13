@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 
 /* UI */
 import FilterBar from "../filters/FilterBar";
@@ -66,6 +68,7 @@ export default function Home({ walletAddress, connect }: Props) {
     setEngineMarkets,
     runSync
   });
+
   /* -----------------------------
      UI STATE
   ----------------------------- */

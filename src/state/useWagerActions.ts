@@ -66,7 +66,7 @@ export function useWagerActions({
 
     try {
       if (payload.style === "P2P") {
-        if (!window.ethereum) return;
+        if (!walletAddress) return;
 
         const factory = await getFactory();
 
@@ -180,34 +180,27 @@ export function useWagerActions({
     setCounterWagers(result.counterWagers);
   }
 
-  async function handleAcceptP2P(wagerId: string) {
-    try {
-      if (!window.ethereum) return;
+async function handleAcceptP2P(escrowAddress: string) {
+  try {
+    if (!walletAddress) return;
 
-      const escrow = await getEscrow(wagerId);
+    const escrow = await getEscrow(escrowAddress);
 
-      const wager = engineWagers.find((w) => w.id === wagerId);
+    const stake = await escrow.stakeAmount();
 
-      if (!wager || wager.style !== "P2P") {
-        console.error("Invalid wager for deposit");
-        return;
-      }
+    const tx = await runTransaction(
+      escrow.deposit({ value: stake })
+    );
 
-      const stake = await escrow.stakeAmount();
-
-      const tx = await runTransaction(
-        escrow.deposit({ value: stake })
-      );
-
-      if (tx) {
-        await tx.wait();
-        await runSync();
-      }
-
-    } catch (err) {
-      console.error("Deposit failed:", err);
+    if (tx) {
+      await tx.wait();
+      await runSync();
     }
+
+  } catch (err) {
+    console.error("Deposit failed:", err);
   }
+}
 
   function handleDeclineP2P() {
     console.log("Decline not supported on-chain");
@@ -218,7 +211,7 @@ export function useWagerActions({
     winner: string
   ) {
     try {
-      if (!window.ethereum) return;
+      if (!walletAddress) return;
       if (!winner) {
         console.error("No winner address provided");
         return;
@@ -242,7 +235,7 @@ export function useWagerActions({
 
   async function handleClaimP2P(escrowAddress: string) {
     try {
-      if (!window.ethereum) return;
+      if (!walletAddress) return;
 
       const escrow = await getEscrow(escrowAddress);
 

@@ -25,6 +25,9 @@ type HistoryItem = {
 export default function ProfileViewer({ wallet, wagers }: Props) {
   const viewerWallet = getSavedWallet();
 
+  console.log("viewerWallet:", viewerWallet);
+  console.log("profileWallet:", wallet);
+
   const isOwner =
     viewerWallet &&
     viewerWallet.toLowerCase() === wallet.toLowerCase();

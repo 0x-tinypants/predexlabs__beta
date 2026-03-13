@@ -8,5 +8,9 @@ export default defineConfig({
     nodePolyfills({
       protocolImports: true
     })
-  ]
+  ],
+
+  resolve: {
+    dedupe: ["react", "react-dom"]
+  }
 });

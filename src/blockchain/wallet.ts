@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-import { initWeb3Auth } from "../web3/web3auth.service";
 
 export const SEPOLIA_CHAIN_ID = 11155111;
 

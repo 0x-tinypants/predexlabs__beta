@@ -5,9 +5,11 @@ import ProfileModal from "../components/profile/ProfileModal";
 export default function Header({
   walletAddress,
   onConnect,
+  onLogout,
 }: {
   walletAddress: string | null;
   onConnect: () => void;
+  onLogout: () => void;
 }) {
 
   const shorten = (addr: string) =>
@@ -254,7 +256,7 @@ export default function Header({
             {/* LOGOUT */}
             <button
               className="menu-logout"
-              onClick={() => window.location.reload()}
+              onClick={onLogout}
             >
               Logout
             </button>

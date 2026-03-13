@@ -15,6 +15,8 @@ import {
   restoreWeb3AuthSession
 } from "../web3/web3auth.service";
 
+import { logoutWeb3Auth } from "../web3/web3auth.service";
+
 export function useWallet() {
 
   const [wallet, setWallet] = useState<string | null>(null);
@@ -31,11 +33,21 @@ export function useWallet() {
 
       try {
 
+        /* stop restore if user logged out */
+
+        if (localStorage.getItem("predex_force_logout") === "true") {
+          setLoading(false);
+          return;
+        }
+
         /* 1️⃣ Try Web3Auth session */
 
         const web3Session = await restoreWeb3AuthSession();
 
-        if (web3Session) {
+        if (web3Session?.address) {
+
+          /* restore provider */
+          (window as any).web3authProvider = web3Session.provider;
 
           const walletAddress = web3Session.address.toLowerCase();
 
@@ -50,7 +62,6 @@ export function useWallet() {
           setLoading(false);
           return;
         }
-
         /* 2️⃣ Fallback to MetaMask */
 
         const saved = getSavedWallet();
@@ -87,6 +98,8 @@ export function useWallet() {
 
   async function connect(providerType: "metamask" | "web3auth" = "metamask") {
 
+    localStorage.removeItem("predex_force_logout");
+
     setLoading(true);
 
     try {
@@ -101,6 +114,15 @@ export function useWallet() {
       } else {
 
         const result = await loginWithWeb3Auth();
+
+        if (!result?.address) {
+          setLoading(false);
+          return;
+        }
+
+        /* expose provider globally for contracts */
+        (window as any).web3authProvider = result.provider;
+
         walletAddress = result.address.toLowerCase();
 
       }
@@ -124,8 +146,14 @@ export function useWallet() {
   /* Disconnect */
   /* -------------------------------- */
 
-  function disconnect() {
+  async function disconnect() {
+
+    localStorage.setItem("predex_force_logout", "true");
+
     disconnectWallet();
+
+    await logoutWeb3Auth();
+
     setWallet(null);
     setProfile(null);
   }
