@@ -5,36 +5,43 @@ export const SEPOLIA_CHAIN_ID = 11155111;
 const SESSION_KEY = "predex_wallet";
 
 /* =========================================================
-   CONNECT WALLET
+   CONNECT METAMASK
 ========================================================= */
 
 export async function connectWallet() {
-  if (!window.ethereum) {
+
+  const ethereum = (window as any).ethereum;
+
+  if (!ethereum) {
     throw new Error("MetaMask not installed");
   }
 
-  const provider = new ethers.BrowserProvider(window.ethereum);
+  const provider = new ethers.BrowserProvider(ethereum);
 
   await provider.send("eth_requestAccounts", []);
 
   const signer = await provider.getSigner();
   const address = await signer.getAddress();
 
-  const chainIdHex = await window.ethereum.request({
+  const chainIdHex = await ethereum.request({
     method: "eth_chainId",
   });
 
   const chainId = parseInt(chainIdHex, 16);
 
   if (chainId !== SEPOLIA_CHAIN_ID) {
-    await window.ethereum.request({
+
+    await ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: "0xaa36a7" }],
     });
+
   }
 
-  /* Save wallet session */
-  localStorage.setItem(SESSION_KEY, address.toLowerCase());
+  localStorage.setItem(
+    SESSION_KEY,
+    address.toLowerCase()
+  );
 
   return {
     provider,
@@ -42,50 +49,19 @@ export async function connectWallet() {
     address,
     chainId,
   };
+
 }
 
 /* =========================================================
-   RESTORE WALLET SESSION
+   RESTORE SESSION
 ========================================================= */
 
 export function getSavedWallet() {
   return localStorage.getItem(SESSION_KEY);
 }
 
-
 /* =========================================================
-   RESTORE WEB3AUTH SESSION
-========================================================= */
-
-export async function restoreWeb3AuthSession() {
-
-  const web3auth = await initWeb3Auth();
-
-  if (!web3auth.connected) return null;
-
-  const provider = web3auth.provider;
-
-  if (!provider) return null;
-
-  const accounts = await provider.request({
-    method: "eth_accounts",
-  }) as string[];
-
-  const address = accounts[0]?.toLowerCase();
-
-  if (!address) return null;
-
-  /* Save session for PreDEX */
-  localStorage.setItem(SESSION_KEY, address);
-
-  return {
-    provider,
-    address,
-  };
-}
-
-/* =========================================================
-   CLEAR WALLET SESSION
+   DISCONNECT
 ========================================================= */
 
 export function disconnectWallet() {
