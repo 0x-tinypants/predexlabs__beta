@@ -9,7 +9,7 @@ import WagerSection from "./WagerSection";
 import CreateWagerModal from "../wager/CreateWagerModal";
 import QuickBetContractModal from "../quickBet/QuickBetContractModal";
 import EmptyStateTile from "./EmptyStateTile";
-
+import DebugPanel from "../dev/debugPanel";
 /* State */
 import { useEngineState } from "../state/useEngineState";
 import { useChainSync } from "../state/useChainSync";
@@ -49,6 +49,11 @@ export default function Home({ walletAddress, connect }: Props) {
     setEngineWagers,
     engineWagersRef
   });
+
+  useEffect(() => {
+    if (!walletAddress) return;
+    runSync();
+  }, [walletAddress]);
 
   const {
     handleSubmitWager,
@@ -161,6 +166,13 @@ export default function Home({ walletAddress, connect }: Props) {
         />
 
       </div>
+
+      {process.env.NODE_ENV === "development" && (
+        <div className="content-rail">
+          <DebugPanel />
+        </div>
+      )}
+
     </>
   );
 }

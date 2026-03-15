@@ -38,7 +38,6 @@ export function useWeb3Auth() {
     const forcedLogout = localStorage.getItem("predex_force_logout");
 
     if (forcedLogout === "true") {
-      console.log("Restore blocked due to logout");
       return null;
     }
 

@@ -203,7 +203,6 @@ async function handleAcceptP2P(escrowAddress: string) {
 }
 
   function handleDeclineP2P() {
-    console.log("Decline not supported on-chain");
   }
 
   async function handleSelectWinnerP2P(

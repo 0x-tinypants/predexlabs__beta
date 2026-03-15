@@ -2,47 +2,57 @@ import type { PreDEXWager, CounterWager } from "../engine/predex.types";
 import type { Wager } from "../wager/types";
 
 /* =========================================================
-   Engine → UI Mapper
-   - OPEN_BET: engine truth (existing)
-   - P2P: chain-backed fields carried through (escrow/state/parties)
+   CHAIN STATE → UI STATUS
+========================================================= */
+
+function mapChainStateToStatus(state?: number): Wager["status"] {
+
+  switch (state) {
+
+    case 0:
+      return "open";
+
+    case 1:
+    case 2:
+    case 3:
+      return "locked";
+
+    case 4:
+    case 5:
+      return "resolved";
+
+    default:
+      return "open";
+  }
+
+}
+
+/* =========================================================
+   ENGINE RESOLUTION → UI RESOLUTION
 ========================================================= */
 
 function mapEngineResolutionState(
   state?: "PENDING" | "CLAIMABLE" | "PROPOSED" | "RESOLVED" | "DISPUTED"
 ): Wager["resolution"]["state"] {
+
   switch (state) {
+
     case "CLAIMABLE":
     case "PROPOSED":
     case "DISPUTED":
     case "RESOLVED":
       return state;
-    case "PENDING":
+
     default:
       return "NONE";
+
   }
+
 }
 
-/**
- * IMPORTANT:
- * Your UI Wager type only supports:
- *   status: "open" | "locked" | "resolved"
- * So we compress chain states into those 3.
- */
-function mapChainStateToStatus(state?: number): Wager["status"] {
-  switch (state) {
-    case 0: // CREATED
-      return "open";
-    case 1: // FUNDED
-    case 2: // PROPOSED
-    case 3: // DISPUTED
-      return "locked";
-    case 4: // RESOLVED
-    case 5: // REFUNDED (treat as resolved for UI union)
-      return "resolved";
-    default:
-      return "open";
-  }
-}
+/* =========================================================
+   MAIN MAPPER
+========================================================= */
 
 export function mapPreDEXWagerToUI(params: {
   engineWager: PreDEXWager;
@@ -51,6 +61,7 @@ export function mapPreDEXWagerToUI(params: {
   eventName: string;
   viewerUserId: string;
 }): Wager | null {
+
   const {
     engineWager,
     counterWagers,
@@ -59,28 +70,34 @@ export function mapPreDEXWagerToUI(params: {
     viewerUserId,
   } = params;
 
+  const viewer = viewerUserId.toLowerCase();
+
   /* =========================================================
-     P2P (CHAIN-BACKED)
-     - visible only to partyA / partyB
-     - uses chain fields carried on engineWager (populated by syncFromChain)
+     P2P WAGER (CHAIN ESCROW)
   ========================================================= */
 
   if (engineWager.style === "P2P") {
-    const partyA = engineWager.partyA as string | undefined;
-    const partyB = engineWager.partyB as string | undefined;
+
+    const partyA = engineWager.partyA?.toLowerCase();
+    const partyB = engineWager.partyB?.toLowerCase();
 
     if (!partyA || !partyB) return null;
 
     const isParticipant =
-      viewerUserId.toLowerCase() === partyA.toLowerCase() ||
-      viewerUserId.toLowerCase() === partyB.toLowerCase();
+      viewer === partyA ||
+      viewer === partyB;
 
     if (!isParticipant) return null;
 
     const chainState = engineWager.chainState;
 
+    const escrowAddress =
+      engineWager.escrowAddress ??
+      engineWager.id;
+
     return {
-      id: engineWager.id,
+
+      id: escrowAddress,
 
       creatorId: engineWager.creatorId,
       creatorUsername,
@@ -97,11 +114,11 @@ export function mapPreDEXWagerToUI(params: {
       },
 
       definition: {
-  description: engineWager.description || "",
-  line: undefined,
-  deadline: engineWager.deadline,
-  declaredDirection: "sideA",
-},
+        description: engineWager.description ?? "",
+        line: undefined,
+        deadline: engineWager.deadline,
+        declaredDirection: "sideA",
+      },
 
       participants: {
         mode: "p2p",
@@ -125,33 +142,43 @@ export function mapPreDEXWagerToUI(params: {
       },
 
       createdAt: engineWager.createdAt,
+
       eventName,
 
-      // chain extensions
+      /* chain fields */
+
       style: "P2P",
-      escrowAddress: engineWager.escrowAddress,
+
+      escrowAddress,
+
       chainState,
+
       partyA,
       partyB,
 
       disputeDeadline: engineWager.disputeDeadline,
+
       proposedWinner: engineWager.proposedWinner,
+
       disputed: engineWager.disputed,
     };
+
   }
 
   /* =========================================================
-     OPEN BET (ENGINE TRUTH) — preserved
+     OPEN BET
   ========================================================= */
 
-  if (engineWager.style !== "OPEN_BET") {
-    return null;
-  }
+  if (engineWager.style !== "OPEN_BET") return null;
 
-  const committed = counterWagers.reduce((sum, cw) => sum + cw.amount, 0);
+  const committed = counterWagers.reduce(
+    (sum, cw) => sum + cw.amount,
+    0
+  );
 
   const remaining =
-    engineWager.exposure.maxExposure - engineWager.exposure.reservedExposure;
+    engineWager.exposure.maxExposure -
+    engineWager.exposure.reservedExposure;
 
   const resolution: Wager["resolution"] = {
     state: mapEngineResolutionState(engineWager.resolution?.state),
@@ -159,6 +186,7 @@ export function mapPreDEXWagerToUI(params: {
   };
 
   return {
+
     id: engineWager.id,
 
     creatorId: engineWager.creatorId,
@@ -193,7 +221,9 @@ export function mapPreDEXWagerToUI(params: {
 
     viewer: {
       isCreator: engineWager.creatorId === viewerUserId,
-      isParticipant: counterWagers.some((cw) => cw.takerId === viewerUserId),
+      isParticipant: counterWagers.some(
+        (cw) => cw.takerId === viewerUserId
+      ),
     },
 
     totals: {
@@ -205,8 +235,8 @@ export function mapPreDEXWagerToUI(params: {
       engineWager.state === "RESOLVED"
         ? "resolved"
         : engineWager.state === "LOCKED"
-          ? "locked"
-          : "open",
+        ? "locked"
+        : "open",
 
     createdAt: engineWager.createdAt,
 
@@ -214,7 +244,7 @@ export function mapPreDEXWagerToUI(params: {
 
     resolution,
 
-    // optional style marker (nice to have)
     style: "OPEN_BET",
   };
+
 }

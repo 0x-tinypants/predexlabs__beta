@@ -25,13 +25,11 @@ function resolveProviderSource() {
 
   /* Web3Auth takes priority */
   if (web3authProvider) {
-    console.log("Using Web3Auth provider");
     return web3authProvider;
   }
 
   /* MetaMask or injected wallet fallback */
   if (injectedProvider) {
-    console.log("Using injected wallet provider");
     return injectedProvider;
   }
 

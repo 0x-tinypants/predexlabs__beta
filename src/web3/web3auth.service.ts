@@ -75,7 +75,6 @@ export async function restoreWeb3AuthSession() {
     try {
       provider = await web3auth.connect();
     } catch (err) {
-      console.log("No previous Web3Auth session");
       return null;
     }
 

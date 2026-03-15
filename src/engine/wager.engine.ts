@@ -4,6 +4,8 @@ import type {
   ChainP2PWager,
 } from "./predex.types";
 
+import { logLifecycle } from "../dev/lifecycleLogger";
+
 export function createWager(
   wagers: PreDEXWager[],
   newWager: Omit<OpenEngineWager, "resolution"> | Omit<ChainP2PWager, "resolution">
@@ -17,6 +19,8 @@ export function createWager(
       },
     };
 
+    logLifecycle("ENGINE_WAGER_BUILT", initializedWager.id);
+
     return [initializedWager, ...wagers];
   }
 
@@ -28,6 +32,8 @@ export function createWager(
         claims: [],
       },
     };
+
+    logLifecycle("ENGINE_WAGER_BUILT", initializedWager.id);
 
     return [initializedWager, ...wagers];
   }

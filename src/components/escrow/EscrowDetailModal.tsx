@@ -33,8 +33,6 @@ export default function EscrowDetailsModal({
 }: EscrowDetailsModalProps) {
   if (!wager) return null;
 
-  console.log("MODAL WAGER:", wager);
-
   const def = wager.definition || {};
 
   const description =

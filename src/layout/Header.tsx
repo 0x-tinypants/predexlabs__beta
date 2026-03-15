@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import logo from "../assets/images/logo.png";
+
 import ProfileModal from "../components/profile/ProfileModal";
 
 export default function Header({
@@ -12,33 +13,34 @@ export default function Header({
   onLogout: () => void;
 }) {
 
+  /* -------------------------------- */
+  /* Helpers */
+  /* -------------------------------- */
+
   const shorten = (addr: string) =>
     `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   /* -------------------------------- */
-  /* Profile Drawer State */
+  /* Profile Drawer */
   /* -------------------------------- */
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileWallet, setProfileWallet] = useState<string | null>(null);
 
   /* -------------------------------- */
-  /* Hamburger Menu State */
+  /* Hamburger Menu */
   /* -------------------------------- */
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
 
-
-  const [network, setNetwork] = useState("Loading...");
   /* -------------------------------- */
-  /* Wallet Click Listener */
+  /* Profile Event Listener */
   /* -------------------------------- */
 
   useEffect(() => {
     const handler = (e: any) => {
       const wallet = e.detail?.wallet;
-
       if (!wallet) return;
 
       setProfileWallet(wallet);
@@ -52,32 +54,8 @@ export default function Header({
     };
   }, []);
 
-
-  useEffect(() => {
-    async function detectNetwork() {
-      if (!window.ethereum) {
-        setNetwork("No Wallet");
-        return;
-      }
-
-      const chainId = await window.ethereum.request({
-        method: "eth_chainId",
-      });
-
-      if (chainId === "0xaa36a7") {
-        setNetwork("Sepolia Testnet");
-      } else if (chainId === "0x1") {
-        setNetwork("Ethereum Mainnet");
-      } else {
-        setNetwork("Unknown Network");
-      }
-    }
-
-    detectNetwork();
-  }, []);
-
   /* -------------------------------- */
-  /* Accordion Toggle */
+  /* Menu Accordion */
   /* -------------------------------- */
 
   const toggleSection = (section: string) => {
@@ -93,9 +71,12 @@ export default function Header({
   return (
     <header className="app-header">
 
+      {/* HEADER RAIL */}
+
       <div className="header-rail">
 
-        {/* LEFT */}
+        {/* LEFT SIDE */}
+
         <div className="header-left">
           <button
             className="hamburger"
@@ -103,23 +84,24 @@ export default function Header({
           >
             ☰
           </button>
-
-          <span className="brand-text">Sepolia Testnet</span>
         </div>
 
         {/* CENTER */}
+
         <div className="header-center">
           <img
             src={logo}
-            alt="Betya logo"
+            alt="PreDEX logo"
             className="header-logo"
           />
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT SIDE */}
+
         <div className="header-right">
 
           {walletAddress ? (
+
             <button
               className="user-status"
               onClick={() => {
@@ -129,20 +111,23 @@ export default function Header({
             >
               {shorten(walletAddress)}
             </button>
+
           ) : (
+
             <button
               className="user-status"
               onClick={onConnect}
             >
               Connect Wallet
             </button>
+
           )}
 
         </div>
 
       </div>
 
-      {/* Profile Drawer */}
+      {/* PROFILE MODAL */}
 
       <ProfileModal
         wallet={profileWallet || walletAddress}
@@ -150,13 +135,10 @@ export default function Header({
         onClose={() => setProfileOpen(false)}
       />
 
-      {/* -------------------------------- */}
-      {/* Hamburger Drawer */}
-      {/* -------------------------------- */}
+      {/* HAMBURGER MENU */}
 
       {menuOpen && (
         <>
-          {/* Overlay */}
           <div
             className="menu-overlay"
             onClick={() => setMenuOpen(false)}
@@ -166,6 +148,8 @@ export default function Header({
             className="menu-drawer"
             onClick={(e) => e.stopPropagation()}
           >
+
+            {/* MENU HEADER */}
 
             <div className="menu-top">
 
@@ -181,7 +165,9 @@ export default function Header({
               </button>
 
             </div>
+
             {/* HISTORY */}
+
             <div
               className="menu-row"
               onClick={() => toggleSection("history")}
@@ -200,6 +186,7 @@ export default function Header({
             )}
 
             {/* HELP */}
+
             <div
               className="menu-row"
               onClick={() => toggleSection("help")}
@@ -222,6 +209,7 @@ export default function Header({
             )}
 
             {/* ABOUT */}
+
             <div
               className="menu-row"
               onClick={() => toggleSection("about")}
@@ -235,18 +223,16 @@ export default function Header({
             {openSection === "about" && (
               <div className="menu-panel">
 
-                <p><strong>PreDEX</strong> is a peer-to-peer wagering platform that uses smart contracts to securely hold and settle bets between two participants.</p>
+                <p>
+                  <strong>PreDEX</strong> is a peer-to-peer wagering
+                  platform using smart contracts to securely hold
+                  and settle bets between participants.
+                </p>
 
-                <p>Instead of trusting a sportsbook or middleman, funds are locked into an on-chain escrow contract until the wager is resolved.</p>
-
-                <p><strong>How it works:</strong></p>
-
-                <p>1. One player creates a wager.</p>
-                <p>2. Another player accepts and deposits the same stake.</p>
-                <p>3. Both players confirm the winner.</p>
-                <p>4. The smart contract releases the funds to the winner.</p>
-
-                <p>This system allows two parties to make and settle wagers directly, without a centralized bookmaker controlling the outcome or the funds.</p>
+                <p>
+                  Funds are locked into an on-chain escrow contract
+                  until the wager is resolved.
+                </p>
 
               </div>
             )}
@@ -254,15 +240,18 @@ export default function Header({
             <div className="menu-spacer" />
 
             {/* LOGOUT */}
+
             <button
               className="menu-logout"
               onClick={onLogout}
             >
               Logout
             </button>
+
           </div>
         </>
       )}
+
     </header>
   );
 }

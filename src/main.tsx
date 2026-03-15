@@ -8,6 +8,11 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./app/App";
 import "./index.css";
 
+/* Protocol Test Runner (DEV ONLY) */
+import { installProtocolTestRunner } from "./test/protocol/runProtocolTests";
+
+installProtocolTestRunner();
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>

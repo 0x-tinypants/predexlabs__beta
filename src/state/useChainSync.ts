@@ -21,21 +21,31 @@ export function useChainSync({
 
   const syncingRef = useRef(false);
 
-  /* ENGINE TICK */
+  /* --------------------------------------------------
+     ENGINE LIFECYCLE TICK
+  -------------------------------------------------- */
 
   useEffect(() => {
 
-    setEngineWagers((prev) =>
-      prev.map((w) =>
-        w.style === "P2P"
-          ? w
-          : evaluateWagerLifecycle(w, new Date().toISOString())
-      )
-    );
+    const interval = setInterval(() => {
 
-  }, [engineWagers.length]);
+      setEngineWagers((prev) =>
+        prev.map((w) =>
+          w.style === "P2P"
+            ? evaluateWagerLifecycle(w, new Date().toISOString())
+            : w
+        )
+      );
 
-  /* CHAIN SYNC */
+    }, 2000); // lifecycle check every 2s
+
+    return () => clearInterval(interval);
+
+  }, []);
+
+  /* --------------------------------------------------
+     CHAIN SYNC
+  -------------------------------------------------- */
 
   const runSync = async () => {
 
@@ -50,8 +60,28 @@ export function useChainSync({
 
   };
 
+  /* run once on login */
+
   useEffect(() => {
+
+    if (!walletAddress) return;
+
     runSync();
+
+  }, [walletAddress]);
+
+  /* background sync */
+
+  useEffect(() => {
+
+    if (!walletAddress) return;
+
+    const interval = setInterval(() => {
+      runSync();
+    }, 30000); // every 30 seconds
+
+    return () => clearInterval(interval);
+
   }, [walletAddress]);
 
   return {

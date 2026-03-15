@@ -16,6 +16,8 @@ import {
 } from "../web3/web3auth.service";
 
 import { logoutWeb3Auth } from "../web3/web3auth.service";
+import { logLifecycle } from "../dev/lifecycleLogger";
+
 
 export function useWallet() {
 
@@ -52,6 +54,8 @@ export function useWallet() {
           const walletAddress = web3Session.address.toLowerCase();
 
           setWallet(walletAddress);
+          logLifecycle("WALLET_CONNECTED", walletAddress);
+
 
           await ensureProfile(walletAddress);
 

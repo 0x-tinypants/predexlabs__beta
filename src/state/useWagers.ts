@@ -389,7 +389,6 @@ export function useWagers() {
     validateDeclaredDirection(uiWager);
 
     // eslint-disable-next-line no-console
-    console.log("[STATE] createOpenBet", uiWager.id);
 
     const declared = uiWager.definition.declaredDirection;
 
@@ -581,7 +580,6 @@ export function useWagers() {
     outcome: "WIN" | "LOSS";
   }) {
     // eslint-disable-next-line no-console
-    console.log("[STATE] submitClaim called", params);
 
     const resolvedOutcome: ResolutionOutcome =
       params.outcome === "WIN" ? "CREATOR_WIN" : "COUNTERPARTY_WIN";

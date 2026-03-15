@@ -22,47 +22,35 @@ export function useHomeTiles({
 }: Params) {
 
   /* ------------------------------------------ */
-  /* Counter wager lookup table                 */
+  /* Counter wager lookup                       */
   /* ------------------------------------------ */
 
   const counterLookup = useMemo(() => {
     const map = new Map<string, CounterWager[]>();
 
     for (const cw of counterWagers) {
-      const existing = map.get(cw.parentWagerId) ?? [];
-      existing.push(cw);
-      map.set(cw.parentWagerId, existing);
+      const arr = map.get(cw.parentWagerId) ?? [];
+      arr.push(cw);
+      map.set(cw.parentWagerId, arr);
     }
 
     return map;
   }, [counterWagers]);
 
   /* ------------------------------------------ */
-  /* Convert engine wagers → UI wagers          */
+  /* Engine → UI mapping                        */
   /* ------------------------------------------ */
 
   const uiWagers: Wager[] = useMemo(() => {
 
-    console.log("HOME engineWagers", engineWagers);
-
-
-    return [...engineWagers]
-
-      /* newest first */
-      .sort((a, b) => {
-        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return bTime - aTime;
-      })
-
+    return engineWagers
       .map((engineWager) => {
 
-        const relatedCounters =
-          counterLookup.get(engineWager.id) ?? [];
+        const counters = counterLookup.get(engineWager.id) ?? [];
 
-        const mapped = mapPreDEXWagerToUI({
+        return mapPreDEXWagerToUI({
           engineWager,
-          counterWagers: relatedCounters,
+          counterWagers: counters,
           creatorUsername:
             engineWager.creatorId ??
             (engineWager as any).partyA ??
@@ -71,109 +59,51 @@ export function useHomeTiles({
           viewerUserId: walletAddress ?? "",
         });
 
-        /* -------------------------------------- */
-        /* Fallback if mapper fails               */
-        /* -------------------------------------- */
-        if (!mapped) {
-          const e: any = engineWager;
-
-          const creator =
-            e.partyA ??
-            e.creatorId ??
-            "";
-
-          const opponent =
-            e.partyB ??
-            "";
-
-          const fallback = {
-            id: e.id,
-            style: "P2P",
-
-            createdAt:
-              e.createdAt ??
-              new Date().toISOString(),
-
-            partyA: creator,
-            partyB: opponent,
-
-            escrowAddress: e.escrowAddress ?? "",
-
-            stake: e.stake ?? 0,
-
-            definition: {
-              description: "Peer-to-Peer Wager",
-              deadline: e.deadline
-                ? new Date(
-                  typeof e.deadline === "number"
-                    ? e.deadline * 1000
-                    : e.deadline
-                ).toISOString()
-                : null
-            },
-
-            exposure: {
-              maxLoss: e.stake ?? 0
-            },
-
-            resolution: {
-              state: "OPEN"
-            }
-          };
-
-          return fallback as unknown as Wager;
-        }
-
-        return mapped;
-
       })
+      .filter(Boolean) as Wager[];
 
-      /* -------------------------------------- */
-      /* Remove closed wagers                   */
-      /* -------------------------------------- */
-
-      .filter((w): w is Wager => {
-
-        if (!w) return false;
-
-        if (w.resolution?.state === "RESOLVED")
-          return false;
-
-        if ((w as any).chainState === 4)
-          return false;
-
-        return true;
-
-      });
-
-  }, [engineWagers, counterWagers, walletAddress, counterLookup]);
+  }, [engineWagers, counterLookup, walletAddress]);
 
   /* ------------------------------------------ */
-  /* Active wagers only                         */
+  /* Filter visible wagers                      */
   /* ------------------------------------------ */
 
   const activeWagers = useMemo(() => {
 
     return uiWagers.filter((w) => {
 
-      const state = w.resolution?.state;
+      const chainState = (w as any).chainState;
 
-      if (state === "RESOLVED") return false;
-      if (state === "CLAIMABLE") return false;
-      if (state === "PROPOSED") return false;
-      if (state === "DISPUTED") return false;
+      /* -------------------------------------- */
+      /* Remove resolved wagers                 */
+      /* -------------------------------------- */
 
-      if ((w as any).chainState === 4)
-        return false;
+      if (chainState === 4) return false;
 
-      /* NEW — remove expired wagers */
-      const deadline = w.definition?.deadline;
+      /* -------------------------------------- */
+      /* Handle CREATED wagers                  */
+      /* -------------------------------------- */
 
-      if (deadline) {
-        const deadlineMs = Date.parse(deadline);
-        if (!isNaN(deadlineMs) && Date.now() > deadlineMs) return false;
-        if (Date.now() > deadlineMs) return false;
+      if (chainState === 0) {
+
+        const deadline = w.definition?.deadline;
+
+        if (deadline) {
+
+          const deadlineMs = Date.parse(deadline);
+
+          if (!isNaN(deadlineMs) && Date.now() > deadlineMs) {
+            /* funding window expired → remove */
+            return false;
+          }
+
+        }
+
       }
+
+      /* -------------------------------------- */
+      /* FUNDED / PROPOSED / DISPUTED stay      */
+      /* -------------------------------------- */
 
       return true;
 
@@ -187,42 +117,31 @@ export function useHomeTiles({
 
   const combinedTiles: CombinedTile[] = useMemo(() => {
 
-    const marketTiles: CombinedTile[] =
-      engineMarkets.map((m) => ({
-        type: "MARKET",
-        data: m,
-        createdAt: m.createdAt,
-      }));
+    const marketTiles: CombinedTile[] = engineMarkets.map((m) => ({
+      type: "MARKET",
+      data: m,
+      createdAt: m.createdAt,
+    }));
 
-    const wagerTiles: CombinedTile[] =
-      activeWagers.map((w) => ({
-        type: "WAGER",
-        data: w,
-        createdAt: w.createdAt,
-      }));
+    const wagerTiles: CombinedTile[] = activeWagers.map((w) => ({
+      type: "WAGER",
+      data: w,
+      createdAt: w.createdAt,
+    }));
 
-    const result = [...marketTiles, ...wagerTiles].sort(
-      (a, b) => {
+    return [...marketTiles, ...wagerTiles].sort((a, b) => {
 
-        const aTime = a.createdAt
-          ? new Date(a.createdAt).getTime()
-          : 0;
+      const aTime = a.createdAt
+        ? new Date(a.createdAt).getTime()
+        : 0;
 
-        const bTime = b.createdAt
-          ? new Date(b.createdAt).getTime()
-          : 0;
+      const bTime = b.createdAt
+        ? new Date(b.createdAt).getTime()
+        : 0;
 
-        return bTime - aTime;
+      return bTime - aTime;
 
-      }
-    );
-
-    console.log("HOME activeWagers", activeWagers);
-    console.log("HOME combinedTiles", result);
-    console.log("HOME uiWagers result", engineWagers.length);
-
-
-    return result;
+    });
 
   }, [engineMarkets, activeWagers]);
 

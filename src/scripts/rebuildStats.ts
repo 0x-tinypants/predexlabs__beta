@@ -3,15 +3,11 @@ import { db } from "../firebase/firebase";
 
 export async function rebuildAllProfileStats() {
 
-  console.log("Starting stat rebuild...");
-
   const profilesSnapshot = await getDocs(collection(db, "profiles"));
 
   for (const profileDoc of profilesSnapshot.docs) {
 
     const wallet = profileDoc.id;
-
-    console.log("Rebuilding:", wallet);
 
     const historyRef = collection(db, "profiles", wallet, "history");
     const historySnapshot = await getDocs(historyRef);
@@ -47,15 +43,7 @@ export async function rebuildAllProfileStats() {
       }
     }, { merge: true });
 
-    console.log("Updated stats:", {
-      wallet,
-      wins,
-      losses,
-      totalWagers,
-      totalVolumeEth
-    });
 
   }
 
-  console.log("Stat rebuild complete.");
 }

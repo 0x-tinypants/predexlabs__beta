@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { logLifecycle } from "../dev/lifecycleLogger";
 import OpenBetTile from "./OpenBetTile";
 import P2PTile from "./P2PTile";
 import type { Wager } from "../wager/types";
@@ -11,11 +13,10 @@ type Props = {
     direction: "more" | "less" | "sideA" | "sideB";
   }) => void;
 
-  // escrow-targeted (preferred)
   onAccept?: (escrowAddress: string) => void;
   onDecline?: (escrowAddress: string) => void;
   onSelectWinner?: (escrowAddress: string, winner: string) => void;
-  onClaim?: (escrowAddress: string) => void; // ✅ NEW
+  onClaim?: (escrowAddress: string) => void;
 
   onOpenDetails?: () => void;
 };
@@ -27,9 +28,14 @@ export default function WagerTile({
   onAccept,
   onDecline,
   onSelectWinner,
-  onClaim, // ✅ NEW
+  onClaim,
   onOpenDetails,
 }: Props) {
+
+  useEffect(() => {
+    logLifecycle("TILE_RENDERED", wager.id);
+  }, []);
+
   const isP2P =
     wager.style === "P2P" ||
     wager.participants.mode === "p2p";
@@ -42,7 +48,7 @@ export default function WagerTile({
         onAccept={onAccept}
         onDecline={onDecline}
         onSelectWinner={onSelectWinner}
-        onClaim={onClaim} // ✅ correctly passed
+        onClaim={onClaim}
         onOpenDetails={onOpenDetails}
       />
     );

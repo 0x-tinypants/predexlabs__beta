@@ -1,3 +1,6 @@
+import { logger } from "../dev/logger";
+import { logLifecycle } from "../dev/lifecycleLogger";
+
 let txPending = false;
 
 export async function runTransaction(
@@ -13,6 +16,8 @@ export async function runTransaction(
 
   try {
 
+    logger.tx("Transaction request started");
+
     window.dispatchEvent(
       new CustomEvent("predex_tx_start", {
         detail: { message: "Confirm transaction in your wallet..." }
@@ -21,20 +26,29 @@ export async function runTransaction(
 
     const tx = await txPromise;
 
+    logger.tx("Transaction submitted", tx.hash);
+
     window.dispatchEvent(
       new CustomEvent("predex_tx_start", {
         detail: { message: "Transaction submitted — waiting for confirmation..." }
       })
     );
 
-    // 🔥 Confirmation happens in background
     tx.wait().then(() => {
+
+      logger.tx("Transaction confirmed", tx.hash);
+
+      logLifecycle("ESCROW_DEPLOYED", tx.hash);
+
       window.dispatchEvent(new Event("predex_tx_end"));
+
     });
 
     return tx;
 
   } catch (err) {
+
+    logger.error("Transaction failed", err);
 
     window.dispatchEvent(new Event("predex_tx_end"));
     throw err;
