@@ -67,3 +67,20 @@ export function getSavedWallet() {
 export function disconnectWallet() {
   localStorage.removeItem(SESSION_KEY);
 }
+
+
+/* =========================================================
+   GET WALLET PROVIDER
+========================================================= */
+
+export function getWalletProvider() {
+
+  const ethereum = (window as any).ethereum;
+
+  if (!ethereum) {
+    throw new Error("Wallet provider not available");
+  }
+
+  return ethereum;
+
+}

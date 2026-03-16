@@ -8,6 +8,7 @@ import { updateProfileIdentity } from "../../services/profile.service";
 import { useRef } from "react";
 import "./profile.css";
 import WalletLink from "./WalletLink";
+import { ethers } from "ethers";
 
 type Props = {
   wallet: string;
@@ -39,7 +40,7 @@ export default function ProfileViewer({ wallet, wagers }: Props) {
   const [usernameInput, setUsernameInput] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
+  const [balance, setBalance] = useState<string | null>(null);
   const handleAvatarUpload = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -108,6 +109,13 @@ export default function ProfileViewer({ wallet, wagers }: Props) {
     }
   };
 
+  const openExplorer = () => {
+    window.open(
+      `https://sepolia.etherscan.io/address/${wallet}`,
+      "_blank"
+    );
+  };
+
   /* -------------------------------- */
   /* Load Profile + History */
   /* -------------------------------- */
@@ -153,6 +161,36 @@ export default function ProfileViewer({ wallet, wagers }: Props) {
     loadProfile();
   }, [wallet]);
 
+
+  useEffect(() => {
+  if (!wallet) return;
+
+  async function loadBalance() {
+    try {
+
+      console.log("Loading balance for:", wallet);
+
+      const provider = new ethers.JsonRpcProvider(
+        "https://ethereum-sepolia.publicnode.com"
+      );
+
+      const balanceWei = await provider.getBalance(wallet);
+
+      const eth = ethers.formatEther(balanceWei);
+
+      console.log("Balance returned:", eth);
+
+      setBalance(Number(eth).toFixed(4));
+
+    } catch (err) {
+      console.error("Balance load failed:", err);
+      setBalance("0.0000");
+    }
+  }
+
+  loadBalance();
+
+}, [wallet]);
   /* -------------------------------- */
   /* Live Activity (active wagers) */
   /* -------------------------------- */
@@ -332,33 +370,53 @@ export default function ProfileViewer({ wallet, wagers }: Props) {
                 📋
               </button>
 
+              <button
+                className="wallet-explorer"
+                onClick={openExplorer}
+                title="View on Etherscan"
+              >
+                ↗
+              </button>
+
             </div>
 
+            {/* Balance */}
 
-            {/* Reputation Badges */}
+            <div className="profile-balance">
 
-            <div className="profile-badges-scroll">
+              <div className="balance-label">
+                Balance
+              </div>
 
-              <div className="profile-badges-track">
-                {badges.map((b, i) => (
-                  <span key={i} className="profile-badge">
-                    {b}
-                  </span>
-                ))}
+              <div className="balance-value">
+                {balance !== null ? `${balance} sETH` : "Loading..."}
               </div>
 
             </div>
-
-            {/* Metadata Line */}
-
-            <div className="profile-trust">
-              {joinDate && `Joined ${joinDate} • `}
-              {profile.stats.totalWagers} wagers •
-              {profile.stats.totalVolumeEth} ETH volume
-            </div>
-
           </div>   {/* closes profile-identity */}
         </div>   {/* closes profile-header */}
+
+        {/* Badges Row */}
+
+        <div className="profile-badges-row">
+
+          {badges.map((b, i) => (
+            <span key={i} className="profile-badge">
+              {b}
+            </span>
+          ))}
+
+        </div>
+
+        {/* Metadata Row */}
+
+        <div className="profile-meta">
+
+          {joinDate && `Joined ${joinDate} • `}
+          {profile.stats.totalWagers} wagers •
+          {profile.stats.totalVolumeEth} ETH volume
+
+        </div>
       </div>   {/* closes profile-identity-card */}
 
       <div className="profile-divider" />

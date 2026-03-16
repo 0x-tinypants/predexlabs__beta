@@ -8,11 +8,12 @@
   display: flex;
   justify-content: flex-end;
 
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0,0,0,.55);
   backdrop-filter: blur(6px);
 
   z-index: 2000;
 }
+
 
 /* =========================================================
    DRAWER SHELL
@@ -30,170 +31,152 @@
 
   background: #0e0e0e;
 
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 1px solid rgba(255,255,255,.05);
 
   box-shadow:
-    -12px 0 45px rgba(0, 0, 0, 0.9),
-    -3px 0 14px rgba(88, 221, 83, 0.18);
+    -12px 0 45px rgba(0,0,0,.9),
+    -3px 0 14px rgba(88,221,83,.18);
 
-  animation: profileSlideIn 0.25s ease;
+  animation: profileSlideIn .25s ease;
 
   overflow: hidden;
 }
 
 @keyframes profileSlideIn {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
 
+/* glow border */
+
 .profile-drawer::before {
+  content:"";
+  position:absolute;
+  inset:0;
 
-  content: "";
+  border-radius:16px;
+  padding:1px;
 
-  position: absolute;
-  inset: 0;
-
-  border-radius: 16px;
-
-  padding: 1px;
-
-  background: linear-gradient(130deg,
-      rgba(88, 221, 83, 0.7),
-      rgba(88, 221, 83, 0.2),
-      rgba(88, 221, 83, 0.7));
+  background:linear-gradient(
+    130deg,
+    rgba(88,221,83,.7),
+    rgba(88,221,83,.2),
+    rgba(88,221,83,.7)
+  );
 
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
 
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
 
-  pointer-events: none;
-
-  opacity: .7;
+  opacity:.7;
+  pointer-events:none;
 }
+
+/* glow halo */
 
 .profile-drawer::after {
+  content:"";
+  position:absolute;
+  inset:-3px;
 
-  content: "";
+  border-radius:18px;
 
-  position: absolute;
-  inset: -3px;
+  background:radial-gradient(
+    circle at 50% 50%,
+    rgba(88,221,83,.25),
+    transparent 70%
+  );
 
-  border-radius: 18px;
+  filter:blur(14px);
+  opacity:.6;
 
-  background: radial-gradient(circle at 50% 50%,
-      rgba(88, 221, 83, 0.25),
-      transparent 70%);
-
-  filter: blur(14px);
-
-  opacity: .6;
-
-  pointer-events: none;
-
+  pointer-events:none;
 }
+
 
 /* =========================================================
    DRAWER HEADER
 ========================================================= */
 
 .profile-drawer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 
-  padding: 18px 20px;
+  padding:18px 20px;
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom:1px solid rgba(255,255,255,.04);
 }
 
 .profile-drawer-title {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: .4px;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.4px;
 }
 
 .profile-drawer-close {
-  border: none;
-  background: none;
+  position:absolute;
+  top:16px;
+  right:16px;
 
-  font-size: 18px;
-  color: white;
+  width:28px;
+  height:28px;
 
-  cursor: pointer;
-  opacity: .7;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.15);
+
+  background:rgba(0,0,0,.6);
+  color:rgba(255,255,255,.7);
+
+  font-size:14px;
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  transition:.15s ease;
 }
 
 .profile-drawer-close:hover {
-  opacity: 1;
-  color: #58dd53;
+  color:white;
+  border-color:rgba(80,255,120,.5);
+  box-shadow:0 0 10px rgba(80,255,120,.25);
 }
+
 
 /* =========================================================
    DRAWER BODY
 ========================================================= */
 
 .profile-drawer-body {
-  flex: 1;
+  flex:1;
 
-  padding: 22px 20px;
+  padding:22px 20px;
 
-  overflow-y: auto;
+  overflow-y:auto;
 
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }
 
-
-.profile-drawer-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-
-  width: 28px;
-  height: 28px;
-
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.15);
-
-  background: rgba(0,0,0,0.6);
-  color: rgba(255,255,255,0.7);
-
-  font-size: 14px;
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  transition: all 0.15s ease;
-}
-
-.profile-drawer-close:hover {
-  color: white;
-  border-color: rgba(80,255,120,0.5);
-  box-shadow: 0 0 10px rgba(80,255,120,0.25);
-}
 
 /* =========================================================
    PROFILE VIEWER
 ========================================================= */
 
 .profile-viewer {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 
-  color: white;
+  color:white;
 }
+
 
 /* =========================================================
    IDENTITY CARD
@@ -202,119 +185,214 @@
 .profile-identity-card {
 
   background:
-    radial-gradient(circle at 50% -20%,
-      rgba(88, 221, 83, 0.12),
-      transparent 60%),
-    linear-gradient(145deg,
+    radial-gradient(
+      circle at 50% -20%,
+      rgba(88,221,83,.10),
+      transparent 60%
+    ),
+    linear-gradient(
+      145deg,
       #121212,
-      #0e0e0e);
+      #0e0e0e
+    );
 
-  border-radius: 14px;
+  border-radius:14px;
 
-  padding: 16px;
+  padding:20px;
 
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border:1px solid rgba(255,255,255,.05);
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    0 6px 18px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 6px 18px rgba(0,0,0,.35);
+
+  display:flex;
+  flex-direction:column;
+  gap:16px;
 }
 
+
 /* =========================================================
-   HEADER / IDENTITY
+   HEADER ROW (ROW 1)
 ========================================================= */
 
 .profile-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+
+  display:grid;
+  grid-template-columns:84px 1fr;
+
+  gap:16px;
+  align-items:center;
 }
 
 .profile-avatar {
-  width: 70px;
-  height: 70px;
 
-  border-radius: 50%;
+  width:84px;
+  height:84px;
 
-  border: 2px solid rgba(88, 221, 83, 0.65);
+  border-radius:50%;
+
+  border:2px solid rgba(88,221,83,.65);
 
   box-shadow:
-    0 0 12px rgba(88, 221, 83, 0.35),
-    0 0 30px rgba(88, 221, 83, 0.15);
+    0 0 12px rgba(88,221,83,.35),
+    0 0 30px rgba(88,221,83,.15);
 
-  margin-bottom: 6px;
-}
-
-.profile-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 12px rgba(88,221,83,0.6);
+  flex-shrink:0;
 }
 
 .profile-identity {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+
+  display:flex;
+  flex-direction:column;
+
+  gap:6px;
+  justify-content:center;
 }
+
+
+/* Username */
 
 .profile-username {
-  font-size: 17px;
-  font-weight: 600;
+
+  font-size:19px;
+  font-weight:600;
+
+  letter-spacing:.2px;
 }
+
+
+/* Wallet Row */
 
 .profile-wallet {
-  font-size: 12px;
-  opacity: .65;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  font-size:12px;
+
+  opacity:.7;
 }
 
-.wallet-copy {
-  margin-left: 6px;
+.wallet-copy,
+.wallet-explorer {
 
-  background: none;
-  border: none;
+  background:none;
+  border:none;
 
-  color: #888;
-  font-size: 12px;
+  color:#8a8a8a;
 
-  cursor: pointer;
+  font-size:12px;
+
+  cursor:pointer;
 }
 
-.wallet-copy:hover {
-  color: #58dd53;
+.wallet-copy:hover,
+.wallet-explorer:hover {
+  color:#58dd53;
 }
 
-.profile-trust {
-  font-size: 12px;
-  opacity: .75;
 
-  margin-top: 4px;
+/* Balance */
+
+.profile-balance {
+
+  margin-top:-2px;
 }
+
+.balance-label {
+
+  font-size:11px;
+  opacity:.5;
+}
+
+.balance-value {
+
+  font-size:16px;
+  font-weight:700;
+
+  color:#58dd53;
+
+  letter-spacing:.3px;
+}
+
 
 /* =========================================================
-   SECTION TITLE
+   BADGES ROW (ROW 2)
 ========================================================= */
 
-.profile-section-title {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .4px;
-  opacity: .75;
+.profile-badges-row {
+
+  display:flex;
+
+  gap:8px;
+
+  overflow-x:auto;
+
+  padding-bottom:2px;
+
+  -webkit-overflow-scrolling:touch;
 }
+
+.profile-badges-row::-webkit-scrollbar {
+  display:none;
+}
+
+.profile-badge {
+
+  font-size:11px;
+
+  padding:4px 10px;
+
+  border-radius:6px;
+
+  background:rgba(88,221,83,.12);
+  border:1px solid rgba(88,221,83,.25);
+
+  color:#58dd53;
+
+  white-space:nowrap;
+
+  box-shadow:0 0 6px rgba(88,221,83,.15);
+}
+
+
+/* =========================================================
+   META ROW (ROW 3)
+========================================================= */
+
+.profile-meta {
+
+  font-size:11px;
+
+  opacity:.55;
+
+  letter-spacing:.3px;
+
+  border-top:1px solid rgba(255,255,255,.05);
+
+  padding-top:8px;
+}
+
 
 /* =========================================================
    DIVIDER
 ========================================================= */
 
 .profile-divider {
-  height: 1px;
+  height:1px;
 
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(88, 221, 83, .55),
-      transparent);
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(88,221,83,.55),
+    transparent
+  );
 
-  margin: 12px 0 4px;
+  margin:12px 0 4px;
 }
+
 
 /* =========================================================
    BUTTON SYSTEM
@@ -322,42 +400,41 @@
 
 .profile-edit-btn {
 
-  margin-top: 10px;
+  margin-top:10px;
 
-  padding: 10px 14px;
+  padding:10px 14px;
+  width:100%;
 
-  width: 100%;
+  border-radius:10px;
 
-  border-radius: 10px;
+  border:1px solid rgba(88,221,83,.45);
 
-  border: 1px solid rgba(88, 221, 83, .45);
+  background:linear-gradient(
+    180deg,
+    rgba(88,221,83,.14),
+    rgba(88,221,83,.05)
+  );
 
-  background: linear-gradient(180deg,
-      rgba(88, 221, 83, .14),
-      rgba(88, 221, 83, .05));
+  color:#7dff9e;
 
-  color: #7dff9e;
+  font-size:13px;
+  font-weight:500;
 
-  font-size: 13px;
-  font-weight: 500;
+  cursor:pointer;
 
-  cursor: pointer;
+  transition:.15s ease;
 
-  transition: all .15s ease;
-
-  box-shadow:
-    0 0 8px rgba(88, 221, 83, .18);
+  box-shadow:0 0 8px rgba(88,221,83,.18);
 }
 
 .profile-edit-btn:hover {
+  border-color:#58dd53;
 
-  border-color: #58dd53;
+  box-shadow:0 0 16px rgba(88,221,83,.35);
 
-  box-shadow:
-    0 0 16px rgba(88, 221, 83, .35);
-
-  transform: translateY(-1px);
+  transform:translateY(-1px);
 }
+
 
 /* =========================================================
    GOLF PROFILE
@@ -365,267 +442,195 @@
 
 .golf-card {
 
-  background: linear-gradient(145deg,
-      #141414,
-      #0f0f0f);
+  background:linear-gradient(
+    145deg,
+    #141414,
+    #0f0f0f
+  );
 
-  border-radius: 10px;
+  border-radius:10px;
 
-  padding: 12px;
+  padding:12px;
 
-  border: 1px solid rgba(255, 255, 255, .04);
+  border:1px solid rgba(255,255,255,.04);
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .03),
-    0 4px 10px rgba(0, 0, 0, .35);
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 4px 10px rgba(0,0,0,.35);
 
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 .golf-row {
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 .golf-label {
-  font-size: 12px;
-  opacity: .7;
+  font-size:12px;
+  opacity:.7;
 }
 
 .golf-value {
-  font-weight: 600;
+  font-weight:600;
 }
 
 .golf-verified {
 
-  font-size: 11px;
-  padding: 3px 9px;
+  font-size:11px;
+  padding:3px 9px;
 
-  border-radius: 6px;
+  border-radius:6px;
 
-  color: #58dd53;
+  color:#58dd53;
 
-  background: rgba(88, 221, 83, .15);
-  border: 1px solid rgba(88, 221, 83, .3);
+  background:rgba(88,221,83,.15);
+  border:1px solid rgba(88,221,83,.3);
 }
 
 .golf-unverified {
 
-  font-size: 11px;
-  padding: 3px 9px;
+  font-size:11px;
+  padding:3px 9px;
 
-  border-radius: 6px;
+  border-radius:6px;
 
-  color: #aaa;
+  color:#aaa;
 
-  background: rgba(255, 255, 255, .05);
-  border: 1px solid rgba(255, 255, 255, .08);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
 }
+
 
 /* =========================================================
    STATS
 ========================================================= */
 
 .profile-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
 }
 
 .profile-stat {
 
-  background: linear-gradient(145deg,
-      #141414,
-      #0f0f0f);
+  background:linear-gradient(
+    145deg,
+    #141414,
+    #0f0f0f
+  );
 
-  border-radius: 10px;
+  border-radius:10px;
 
-  padding: 12px;
+  padding:12px;
+  text-align:center;
 
-  text-align: center;
-
-  border: 1px solid rgba(255, 255, 255, .04);
+  border:1px solid rgba(255,255,255,.04);
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .03),
-    0 4px 10px rgba(0, 0, 0, .35);
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 4px 10px rgba(0,0,0,.35);
 }
 
 .stat-label {
-  font-size: 11px;
-  opacity: .6;
+  font-size:11px;
+  opacity:.6;
 }
 
 .stat-value {
-  margin-top: 4px;
+  margin-top:4px;
 
-  font-size: 15px;
-  font-weight: 600;
+  font-size:15px;
+  font-weight:600;
 }
 
-.stat-value.win {
-  color: #2cff9d;
-}
+.stat-value.win  { color:#2cff9d; }
+.stat-value.loss { color:#ff5c5c; }
 
-.stat-value.loss {
-  color: #ff5c5c;
-}
 
 /* =========================================================
    HISTORY
 ========================================================= */
 
 .profile-history {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 .history-row {
 
-  display: grid;
-  grid-template-columns: 65px 1fr 90px 60px;
+  display:grid;
+  grid-template-columns:65px 1fr 90px 60px;
 
-  align-items: center;
+  align-items:center;
 
-  padding: 9px 11px;
+  padding:9px 11px;
 
-  background: linear-gradient(145deg,
-      #121212,
-      #0e0e0e);
+  background:linear-gradient(
+    145deg,
+    #121212,
+    #0e0e0e
+  );
 
-  border-radius: 8px;
+  border-radius:8px;
 
-  font-size: 13px;
+  font-size:13px;
 
-  border: 1px solid rgba(255, 255, 255, .03);
+  border:1px solid rgba(255,255,255,.03);
 
-  transition: all .15s ease;
+  transition:.15s ease;
 }
 
 .history-row:hover {
-  transform: translateX(2px);
-  background: linear-gradient(145deg,
-      #161616,
-      #101010);
+  transform:translateX(2px);
+
+  background:linear-gradient(
+    145deg,
+    #161616,
+    #101010
+  );
 }
 
 .history-result {
 
-  padding: 3px 9px;
+  padding:3px 9px;
 
-  border-radius: 6px;
+  border-radius:6px;
 
-  font-size: 11px;
-  font-weight: 600;
+  font-size:11px;
+  font-weight:600;
 
-  width: fit-content;
+  width:fit-content;
 }
 
 .history-result.win {
-  background: rgba(44, 255, 157, .15);
-  color: #2cff9d;
+  background:rgba(44,255,157,.15);
+  color:#2cff9d;
 }
 
 .history-result.loss {
-  background: rgba(255, 92, 92, .15);
-  color: #ff5c5c;
+  background:rgba(255,92,92,.15);
+  color:#ff5c5c;
 }
 
-.history-opponent {
-  opacity: .85;
-}
+.history-opponent { opacity:.85; }
+.history-stake    { text-align:right; }
+.history-time     { text-align:right; opacity:.6; }
 
-.history-stake {
-  text-align: right;
-}
-
-.history-time {
-  text-align: right;
-  opacity: .6;
-}
-
-.profile-activity-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.activity-toggle button {
-  background: none;
-  border: none;
-  color: #aaa;
-  margin-left: 8px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.activity-toggle button.active {
-  color: #58dd53;
-  font-weight: 600;
-}
-
-/* =========================================================
-   BADGES
-========================================================= */
-
-.profile-badges-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-
-  margin-top: 8px;
-
-  -webkit-overflow-scrolling: touch;
-}
-
-.profile-badges-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.profile-badges-track {
-  display: flex;
-  gap: 8px;
-  width: max-content;
-}
-
-.profile-badge {
-
-  font-size: 11px;
-  padding: 3px 8px;
-
-  border-radius: 6px;
-
-  background: rgba(88, 221, 83, .12);
-  border: 1px solid rgba(88, 221, 83, .25);
-
-  color: #58dd53;
-
-  white-space: nowrap;
-
-  box-shadow: 0 0 6px rgba(88, 221, 83, .15);
-}
-
-
-.wallet-link {
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.wallet-link:hover {
-  color: #58dd53;
-}
 
 /* =========================================================
    MOBILE
 ========================================================= */
 
-@media (max-width: 720px) {
+@media (max-width:720px) {
+
   .profile-drawer {
-    width: 100%;
-    border-radius: 0;
+    width:100%;
+    border-radius:0;
   }
+
 }
